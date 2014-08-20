@@ -1,3 +1,0 @@
-django>=1.4.12
-
--e git+https://github.com/edx/django-oauth2-provider.git@0250c1c0fad965d95723a69967e21b5529b37611#egg=django-oauth2-provider
