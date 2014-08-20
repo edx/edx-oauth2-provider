@@ -6,26 +6,29 @@ import json
 import os.path
 import urlparse
 
-from django.conf import settings
+from django import VERSION
+
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import TestCase
-from django.test.utils import override_settings
-from django.contrib.auth.models import User
-
-import provider.oauth2.models
-import provider.oauth2.views
-from provider.constants import PUBLIC, CONFIDENTIAL
 from factory.django import DjangoModelFactory
 from factory import PostGenerationMethodCall
 from ddt import ddt, data
 
+import provider.oauth2.models
+import provider.oauth2.views
+from provider.constants import PUBLIC, CONFIDENTIAL
 import oauth2_provider.views
 import oauth2_provider.models
 
 
-OAUTH2_FEATURES = settings.FEATURES.copy()
-OAUTH2_FEATURES['ENABLE_OAUTH2_PROVIDER'] = True
+# Support custom user models for Django 1.5+
+if VERSION >= (1, 5):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+else:
+    from django.contrib.auth.models import User
+
 
 USERNAME = 'some_username'
 EMAIL = 'test@example.com'
@@ -86,6 +89,7 @@ class UserFactory(DjangoModelFactory):
     FACTORY_FOR = User
     password = PostGenerationMethodCall('set_password', 'test')
 
+
 class ClientFactory(DjangoModelFactory):
     FACTORY_FOR = provider.oauth2.models.Client
 
@@ -98,7 +102,6 @@ class TrustedClientFactory(DjangoModelFactory):
 
 
 @ddt
-@override_settings(FEATURES=OAUTH2_FEATURES)
 class AccessTokenTest(TestCase):
     def setUp(self):
         self.url = reverse('oauth2:access_token')
@@ -172,9 +175,7 @@ class ClientBaseTest(TestCase):
         return response
 
 
-@override_settings(FEATURES=OAUTH2_FEATURES)
 class TrustedClientTest(ClientBaseTest):
-
     def test_untrusted_client(self):
         response = self.login_and_authorize()
 
@@ -191,9 +192,7 @@ class TrustedClientTest(ClientBaseTest):
         self.assertEqual(reverse('oauth2:redirect'), path(response['Location']))
 
 
-@override_settings(FEATURES=OAUTH2_FEATURES)
 class ClientScopeTest(ClientBaseTest):
-
     def get_access_token_response(self):
         response = self.login_and_authorize()
         self.assertEqual(302, response.status_code)

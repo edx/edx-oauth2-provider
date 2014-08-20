@@ -53,8 +53,6 @@ LOGIN_REDIRECT_URL = '/accounts/login/'
 
 TEMPLATE_DIRS = 'tests'
 
-FEATURES = {}
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -71,5 +69,3 @@ INSTALLED_APPS = (
     'provider.oauth2',
     'oauth2_provider',
 )
-
-#from oauth2_provider.constants import *

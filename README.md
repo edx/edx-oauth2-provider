@@ -3,6 +3,12 @@ edX OAuth2 Provider
 OAuth2 provider for edX Platform.
 
 
+Testing
+-------
+
+        $ ./manage.py test
+
+
 How to Contribute
 -----------------
 Contributions are very welcome, but for legal reasons, you must submit a signed
