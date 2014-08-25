@@ -20,6 +20,9 @@ setup(
     ],
     packages=['oauth2_provider'],
     dependency_links=[
-        'git+https://github.com/edx/django-oauth2-provider.git@0250c1c0fad965d95723a69967e21b5529b37611#egg=django-oauth2-provider',
+        'http://github.com/edx/django-oauth2-provider/tarball/0250c1c0fa#egg=django-oauth2-provider',
+    ],
+    install_requires=[
+        'django-oauth2-provider'
     ]
 )
