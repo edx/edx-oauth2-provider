@@ -1,33 +1,15 @@
-"""OAuth2 provider tests"""
-
-# pylint: disable=missing-docstring
-
 import json
 import os.path
 import urlparse
 
-from django import VERSION
-
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import TestCase
-from factory.django import DjangoModelFactory
-from factory import PostGenerationMethodCall
 from ddt import ddt, data
 
-import provider.oauth2.models
-import provider.oauth2.views
 from provider.constants import PUBLIC, CONFIDENTIAL
-import oauth2_provider.views
-import oauth2_provider.models
-
-
-# Support custom user models for Django 1.5+
-if VERSION >= (1, 5):
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-else:
-    from django.contrib.auth.models import User
+from provider.oauth2.tests import BaseOAuth2TestCase
+from oauth2_provider.tests.factories import UserFactory, ClientFactory, TrustedClientFactory
 
 
 USERNAME = 'some_username'
@@ -36,10 +18,6 @@ PASSWORD = 'some_password'
 
 CLIENT_ID = 'some_client_id'
 CLIENT_SECRET = 'some_client_secret'
-
-CLIENT_URL = 'http://example.com'
-CLIENT_REDIRECT_URI = 'http://example.com/application'
-
 
 # Data to generate login tests. Missing fields default to the values
 # in the module variables above. 'success' defaults to False.
@@ -85,24 +63,15 @@ CUSTOM_PASSWORD_GRANT_TEST_DATA = [
 ]
 
 
-class UserFactory(DjangoModelFactory):
-    FACTORY_FOR = User
-    password = PostGenerationMethodCall('set_password', 'test')
-
-
-class ClientFactory(DjangoModelFactory):
-    FACTORY_FOR = provider.oauth2.models.Client
-
-    url = CLIENT_URL
-    redirect_uri = CLIENT_REDIRECT_URI
-
-
-class TrustedClientFactory(DjangoModelFactory):
-    FACTORY_FOR = oauth2_provider.models.TrustedClient
+def path(url):
+    """Get and normalize the path on a URL"""
+    return os.path.normpath(urlparse.urlparse(url).path)
 
 
 @ddt
-class AccessTokenTest(TestCase):
+class AccessTokenTest(BaseOAuth2TestCase):
+    fixtures = ['test_oauth2.json']
+
     def setUp(self):
         self.url = reverse('oauth2:access_token')
         self.user = UserFactory.create(
@@ -138,6 +107,31 @@ class AccessTokenTest(TestCase):
         else:
             self.assertEqual(400, response.status_code)
 
+    def _login_authorize_get_token(self):
+        required_props = ['access_token', 'token_type']
+
+        self.login()
+        self._login_and_authorize()
+
+        response = self.client.get(self.redirect_url())
+        query = QueryDict(urlparse.urlparse(response['Location']).query)
+        code = query['code']
+
+        response = self.client.post(self.access_token_url(), {
+            'grant_type': 'authorization_code',
+            'client_id': self.get_client().client_id,
+            'client_secret': self.get_client().client_secret,
+            'code': code})
+
+        self.assertEqual(200, response.status_code, response.content)
+
+        token = json.loads(response.content)
+
+        for prop in required_props:
+            self.assertIn(prop, token, "Access token response missing required property: %s" % prop)
+
+        return token
+
 
 class ClientBaseTest(TestCase):
     def setUp(self):
@@ -150,11 +144,12 @@ class ClientBaseTest(TestCase):
             client_secret=CLIENT_SECRET,
             client_type=CONFIDENTIAL
         )
+
         self.payload = {
             'client_id': CLIENT_ID,
             'response_type': 'code',
             'state': 'some_state',
-            'redirect_uri': CLIENT_REDIRECT_URI
+            'redirect_uri': ClientFactory.redirect_uri
         }
 
     def set_scope(self, scope):
@@ -234,8 +229,3 @@ class ClientScopeTest(ClientBaseTest):
         values = json.loads(response.content)
         self.assertNotIn('preferred_username', values)
         self.assertNotIn('preferred_username', values.get('scope'))
-
-
-def path(url):
-    """Get and normalize the path on a URL"""
-    return os.path.normpath(urlparse.urlparse(url).path)

@@ -47,3 +47,5 @@ reports/
 coverage/
 
 acceptance_tests/*.png
+
+*.sqlite
