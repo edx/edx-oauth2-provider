@@ -9,6 +9,7 @@ class PublicPasswordBackend(object):
     """
     Simple client authentication wrapper backends that delegates to
     `oauth2_provider.forms.PublicPasswordGrantForm`
+
     """
 
     def authenticate(self, request=None):
@@ -18,6 +19,7 @@ class PublicPasswordBackend(object):
 
         form = PublicPasswordGrantForm(request.REQUEST)
 
+        # pylint: disable=no-member
         if form.is_valid():
             return form.cleaned_data.get('client')
 

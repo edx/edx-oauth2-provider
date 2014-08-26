@@ -1,5 +1,6 @@
 """
-OAuth2 provider customized `django-oauth2-provider` forms
+OAuth2 provider customized `django-oauth2-provider` forms.
+
 """
 
 from django.contrib.auth import authenticate
@@ -18,6 +19,8 @@ from oauth2_provider.constants import SCOPE_NAMES
 # defined for this provider. Otherwise it will use the default values from
 # the django-oauth2-provider package.
 
+# pylint: disable=missing-docstring,no-member
+
 class AuthorizationRequestForm(provider.oauth2.forms.AuthorizationRequestForm):
     scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
 
@@ -34,11 +37,15 @@ class AuthorizationCodeGrantForm(provider.oauth2.forms.AuthorizationCodeGrantFor
     scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
 
 
+# pylint: enable=missing-docstring,no-member
+
 # The forms in this module are required to use email as a secondary
 # identifier when authenticating via OAuth2, since the specification
-# only uses the `username` parameter. An alternative approach is to
-# write a backend like `django.contrib.auth.backends.ModelBackend`
-# and add it to `AUTHENTICATION_BACKENDS` in the Django settings.
+# only uses the `username` parameter.
+#
+# TODO: An alternative, simpler, approach is to write a backend that
+# like `django.contrib.auth.backends.ModelBackend` and add it to
+# `AUTHENTICATION_BACKENDS` in the Django settings.
 
 
 class PasswordGrantForm(provider.oauth2.forms.PasswordGrantForm):

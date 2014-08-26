@@ -25,3 +25,7 @@ class ClientFactory(DjangoModelFactory):
 
 class TrustedClientFactory(DjangoModelFactory):
     FACTORY_FOR = oauth2_provider.models.TrustedClient
+
+
+class AccessTokenFactory(DjangoModelFactory):
+    FACTORY_FOR = provider.oauth2.models.AccessToken

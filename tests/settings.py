@@ -51,7 +51,15 @@ ROOT_URLCONF = 'tests.urls'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/accounts/login/'
 
-TEMPLATE_DIRS = 'tests'
+TEMPLATE_DIRS = ('tests',)
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -69,3 +77,5 @@ INSTALLED_APPS = (
     'provider.oauth2',
     'oauth2_provider',
 )
+
+OAUTH_OIDC_ISSUER = 'https://example.test/oauth2'

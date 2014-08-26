@@ -1,12 +1,15 @@
 """
-Custom OAuth2 modes
+Custom OAuth2 models
+
 """
 
 from django.db import models
 
 from provider.oauth2.models import Client
 
-import oauth2_provider.constants
+# Import constants to force override of `provider.scope`
+# See constants.py for explanation
+import oauth2_provider.constants  # pylint: disable=unused-import
 
 
 class TrustedClient(models.Model):
