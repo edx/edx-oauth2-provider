@@ -1,5 +1,6 @@
 """
 OAuth2 provider `django-oauth2-provider` authentication backends
+
 """
 
 from oauth2_provider.forms import PublicPasswordGrantForm
@@ -13,7 +14,8 @@ class PublicPasswordBackend(object):
     """
 
     def authenticate(self, request=None):
-        "Returns client if correctly authenticated. Otherwise returns None"
+        """ Returns client if correctly authenticated. Otherwise returns None """
+
         if request is None:
             return None
 
