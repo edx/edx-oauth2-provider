@@ -30,6 +30,10 @@ specification, it should use the `https` scheme, host and optionally the port nu
 The `id_token` expiration, which defaults to 30 seconds, can be overriden by setting `OAUTH_ID_TOKEN_EXPIRATION` to a
 different value.
 
+It is possible to customize the OpenID Connect scopes and claims, using the settings `OAUTH_OIDC_ID_TOKEN_HANDLERS`
+and `OAUTH_OIDC_USERINFO_HANDLERS`, which manage the claims associated with the `id_token` during authorization, and
+the results of the `userinfo` endpoint respectively. For more information see `oauth2_profider/oidc/handlers.py`.
+
 
 Testing
 -------

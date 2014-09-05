@@ -5,17 +5,13 @@ OpenID Connect core related utility functions.
 
 import jwt
 
+from oauth2_provider import constants
+from oauth2_provider.utils import import_string
 from oauth2_provider.oidc.collect import collect, collect_authorized_scope
 
-from oauth2_provider.oidc.handlers import (
-    BasicIDTokenHandler,
-    BasicUserInfoHandler,
-    ProfileHandler,
-    EmailHandler
-)
-
-DEFAULT_ID_TOKEN_HANDLERS = (BasicIDTokenHandler, ProfileHandler, EmailHandler)
-DEFAULT_USERINFO_HANDLERS = (BasicUserInfoHandler, ProfileHandler, EmailHandler)
+# Resolve the claim handlers
+ID_TOKEN_HANDLERS = [import_string(cls) for cls in constants.ID_TOKEN_HANDLERS]
+USERINFO_HANDLERS = [import_string(cls) for cls in constants.USERINFO_HANDLERS]
 
 
 def authorized_scopes(scope_names, user, client):
@@ -30,7 +26,7 @@ def authorized_scopes(scope_names, user, client):
         client (Client): OAuth2 Client for the request.
 
     """
-    handlers = DEFAULT_ID_TOKEN_HANDLERS
+    handlers = ID_TOKEN_HANDLERS
 
     return collect_authorized_scope(handlers, scope_names, user, client)
 
@@ -56,7 +52,7 @@ def id_token_claims(access_token, nonce=None, claims_request=None):
 
     claims = claims_request.get('id_token', {}) if claims_request else {}
 
-    handlers = DEFAULT_ID_TOKEN_HANDLERS
+    handlers = ID_TOKEN_HANDLERS
 
     if nonce:
         claims.update({'nonce': {'value': nonce}})
@@ -90,7 +86,7 @@ def userinfo_claims(access_token, scope_names=None, claims_request=None):
 
     """
 
-    handlers = DEFAULT_USERINFO_HANDLERS
+    handlers = USERINFO_HANDLERS
 
     claims = claims_request.get('userinfo', {}) if claims_request else {}
 

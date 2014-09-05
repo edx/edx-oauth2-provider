@@ -169,7 +169,9 @@ def _validate_claim_values(name, value, ignore_errors):
 
 def _visit_handlers(handlers, visitor, preffix, suffixes):
     """ Use visitor partern to collect information from handlers """
+
     handlers = [cls() for cls in handlers]
+
     results = []
     for handler in handlers:
         for suffix in suffixes:

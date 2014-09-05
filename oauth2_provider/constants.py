@@ -9,7 +9,6 @@ import provider.constants
 import provider.scope
 import provider.oauth2.forms
 
-
 # REQUIRED Issuer Identifider (the `iss` field in the `id_token`)
 OAUTH_OIDC_ISSUER = settings.OAUTH_OIDC_ISSUER
 
@@ -36,6 +35,24 @@ SCOPES = (
 SCOPE_NAMES = [(name, name) for (value, name) in SCOPES]
 SCOPE_NAME_DICT = dict([(name, value) for (value, name) in SCOPES])
 SCOPE_VALUE_DICT = dict([(value, name) for (value, name) in SCOPES])
+
+
+# OpenID Connect claim handlers
+
+DEFAULT_ID_TOKEN_HANDLERS = (
+    'oauth2_provider.oidc.handlers.BasicIDTokenHandler',
+    'oauth2_provider.oidc.handlers.ProfileHandler',
+    'oauth2_provider.oidc.handlers.EmailHandler',
+)
+
+DEFAULT_USERINFO_HANDLERS = (
+    'oauth2_provider.oidc.handlers.BasicUserInfoHandler',
+    'oauth2_provider.oidc.handlers.ProfileHandler',
+    'oauth2_provider.oidc.handlers.EmailHandler',
+)
+
+ID_TOKEN_HANDLERS = getattr(settings, 'OAUTH_OIDC_ID_TOKEN_HANDLERS', DEFAULT_ID_TOKEN_HANDLERS)
+USERINFO_HANDLERS = getattr(settings, 'OAUTH_OIDC_USERINFO_HANDLERS', DEFAULT_USERINFO_HANDLERS)
 
 
 # Override django-oauth2-provider scopes (OAUTH_SCOPES)
