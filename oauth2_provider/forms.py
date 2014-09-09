@@ -22,19 +22,27 @@ from oauth2_provider.constants import SCOPE_NAMES
 # pylint: disable=missing-docstring,no-member
 
 class AuthorizationRequestForm(provider.oauth2.forms.AuthorizationRequestForm):
-    scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
+    def __init__(self, *args, **kwargs):
+        super(AuthorizationRequestForm, self).__init__(*args, **kwargs)
+        self.fields['scope'] = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
 
 
 class AuthorizationForm(provider.oauth2.forms.AuthorizationForm):
-    scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
+    def __init__(self, *args, **kwargs):
+        super(AuthorizationForm, self).__init__(*args, **kwargs)
+        self.fields['scope'] = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
 
 
 class RefreshTokenGrantForm(provider.oauth2.forms.RefreshTokenGrantForm):
-    scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
+    def __init__(self, *args, **kwargs):
+        super(RefreshTokenGrantForm, self).__init__(*args, **kwargs)
+        self.fields['scope'] = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
 
 
 class AuthorizationCodeGrantForm(provider.oauth2.forms.AuthorizationCodeGrantForm):
-    scope = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
+    def __init__(self, *args, **kwargs):
+        super(AuthorizationCodeGrantForm, self).__init__(*args, **kwargs)
+        self.fields['scope'] = ScopeChoiceField(choices=SCOPE_NAMES, required=False)
 
 
 # pylint: enable=missing-docstring,no-member

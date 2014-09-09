@@ -117,28 +117,17 @@ class ClientScopeTest(ClientTestCase):
 
         return response
 
-    def test_username_scope(self):
-        self.use_trusted_client()
-        self.set_scope('preferred_username')
-
-        response = self.get_access_token_response()
-
-        self.assertEqual(200, response.status_code)
-
-        values = json.loads(response.content)
-        self.assertEqual(values.get('preferred_username'), test_data.USERNAME)
-        self.assertIn('preferred_username', values.get('scope'))
-
-    def test_no_scope(self):
+    def test_default_scope(self):
         self.use_trusted_client()
 
         response = self.get_access_token_response()
-
         self.assertEqual(200, response.status_code)
 
         values = json.loads(response.content)
-        self.assertNotIn('preferred_username', values)
-        self.assertNotIn('preferred_username', values.get('scope'))
+        scope = values.get('scope', '').split()
+
+        # The default scope should be empty
+        self.assertEqual(len(scope), 0)
 
 
 @override_settings(OAUTH_OIDC_ISSUER=test_data.ISSUER)

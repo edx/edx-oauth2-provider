@@ -18,17 +18,16 @@ OAUTH_OIDC_ISSUER = settings.OAUTH_OIDC_ISSUER
 DEFAULT_SCOPE = 0
 OPEN_ID_SCOPE = 1 << 0
 PROFILE_SCOPE = 1 << 1
-USERNAME_SCOPE = 1 << 2
-EMAIL_SCOPE = 1 << 3
+EMAIL_SCOPE = 1 << 2
 
-# All scopes as required by django-oauth2-provider
-# The default scope value is SCOPES[0][0]
+# Scope setting as required by django-oauth2-provider
+# The default scope value is SCOPES[0][0], which in this case is zero.
+# `django-oauth2-provider` considers a scope value of zero as empty,
+# ignoring its name when requested.
 SCOPES = (
     (DEFAULT_SCOPE, 'default'),
     (OPEN_ID_SCOPE, 'openid'),
     (PROFILE_SCOPE, 'profile'),
-    (USERNAME_SCOPE, 'username'),  # Only used for OAuth, not OIDC.
-    (USERNAME_SCOPE, 'preferred_username'),  # Alias of username
     (EMAIL_SCOPE, 'email'),
 )
 
@@ -74,3 +73,6 @@ provider.scope.SCOPES = SCOPES
 provider.scope.SCOPE_NAMES = SCOPE_NAMES
 provider.scope.SCOPE_NAME_DICT = SCOPE_NAME_DICT
 provider.scope.SCOPE_VALUE_DICT = SCOPE_VALUE_DICT
+
+provider.oauth2.forms.SCOPES = SCOPES
+provider.oauth2.forms.SCOPE_NAMES = SCOPE_NAMES

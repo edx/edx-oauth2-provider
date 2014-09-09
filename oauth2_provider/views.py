@@ -132,9 +132,6 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
             # Don't add anything if we are using OpenID Connect
             return data
 
-        if provider.scope.check(constants.USERNAME_SCOPE, access_token.scope):
-            data['preferred_username'] = access_token.user.username
-
         return data
 
     def id_token_data(self, access_token):
