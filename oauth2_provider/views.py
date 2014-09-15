@@ -190,7 +190,11 @@ class ProtectedView(View):
 
         if token:
             # Verify token exists and is valid
-            access_token = AccessToken.objects.filter(token=token).first()
+            access_token = AccessToken.objects.filter(token=token)
+            if access_token:
+                access_token = access_token[0]
+            else:
+                access_token = None
 
             if access_token is None or access_token.get_expire_delta() <= 0:
                 error_msg = 'invalid_token'

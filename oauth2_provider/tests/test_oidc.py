@@ -12,20 +12,22 @@ from provider.scope import check
 
 from oauth2_provider import constants
 from oauth2_provider.oidc import id_token_claims, encode_claims, userinfo_claims
-from oauth2_provider.tests.base import BaseTestCase
+from oauth2_provider.tests.base import OAuth2TestCase
+from oauth2_provider.tests.factories import AccessTokenFactory
 
 BASE_DATETIME = datetime.datetime(1970, 1, 1)
 
 
 @mock.patch('django.utils.timezone.now', mock.Mock(return_value=BASE_DATETIME))
 @override_settings(OAUTH_OIDC_ISSUER='https://example.com/')
-class OIDCTestCase(BaseTestCase):
+class BaseTestCase(OAuth2TestCase):
     def setUp(self):
-        super(OIDCTestCase, self).setUp()
+        super(BaseTestCase, self).setUp()
         self.nonce = unicode(uuid.uuid4())
+        self.access_token = AccessTokenFactory(user=self.user, client=self.auth_client)
 
 
-class IdTokenTest(OIDCTestCase):
+class IdTokenTest(BaseTestCase):
     def _get_actual_id_token(self, access_token, nonce):
         with mock.patch('oauth2_provider.oidc.handlers.datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = BASE_DATETIME
@@ -101,7 +103,7 @@ class IdTokenTest(OIDCTestCase):
         self.assertEqual(claims, expected)
 
 
-class UserInfoTest(OIDCTestCase):
+class UserInfoTest(BaseTestCase):
     def assertIncludedClaims(self, claims, expected_scope=None, expected_claims=None):
         expected_scope = expected_scope if expected_scope else []
         expected_claims = expected_claims if expected_claims else []
@@ -125,7 +127,25 @@ class UserInfoTest(OIDCTestCase):
         self.access_token.scope |= constants.PROFILE_SCOPE
         self.access_token.save()
 
-        claims = userinfo_claims(self.access_token, claims_request={'preferred_username': {'value': 'pedro'}})
+        claims = userinfo_claims(
+            self.access_token,
+            scope_names=['openid'],  # it should not matter if we don't add 'profile'
+            claims_request={'userinfo': {'preferred_username': {'value': 'pedro'}}},
+        )
+
+        self.assertEqual(claims['preferred_username'], self.user.username)
+        self.assertIn('sub', claims)
+        self.assertEqual(len(claims), 2)  # should not return any more claims
+
+    def test_not_recognized_values(self):
+        claims = userinfo_claims(
+            self.access_token,
+            scope_names=['openid'],  # it should not matter if we don't add 'profile'
+            claims_request={'userinfo': {'foo': {'value': 'bar'}}},
+        )
+
+        self.assertIn('sub', claims)
+        self.assertEqual(len(claims), 1)
 
     def test_arguments(self):
         """ Test if the responses contain the requested claims according to permissions"""
