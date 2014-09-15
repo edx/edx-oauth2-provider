@@ -30,6 +30,9 @@ class IdTokenTest(OIDCTestCase):
         with mock.patch('oauth2_provider.oidc.handlers.datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = BASE_DATETIME
             id_token = id_token_claims(access_token, nonce)
+
+            self.assertIn('sub', id_token)
+            id_token['sub'] = None  # clear id token since a handler can change it
             return id_token
 
     def _get_expected_id_token(self, access_token, nonce):
@@ -38,7 +41,7 @@ class IdTokenTest(OIDCTestCase):
         # Basic OpenID Connect ID token claims
         expected = {
             'iss': settings.OAUTH_OIDC_ISSUER,
-            'sub': str(access_token.user.pk),
+            'sub': None,
             'aud': client.client_id,
             'iat': 0,
             'exp': 30,
@@ -76,7 +79,6 @@ class IdTokenTest(OIDCTestCase):
         claims = self._get_actual_id_token(self.access_token, self.nonce)
         expected = self._get_expected_id_token(self.access_token, self.nonce)
         self.assertEqual(claims, expected)
-
         self.assertEqual(self._encode_id_token(claims, 'test_secret'),
                          self._encode_id_token(expected, 'test_secret'))
 
