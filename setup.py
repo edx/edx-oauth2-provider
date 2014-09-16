@@ -20,10 +20,10 @@ setup(
     ],
     packages=['oauth2_provider'],
     dependency_links=[
-        'http://github.com/edx/django-oauth2-provider/tarball/0.2.7-dev+edx.1#egg=django-oauth2-provider',
+        'git+https://github.com/edx/django-oauth2-provider@0.2.7-dev-edx.1#egg=django-oauth2-provider-0.2.7-fork-edx-1',
     ],
     install_requires=[
-        'django-oauth2-provider',
+        'django-oauth2-provider==0.2.7-fork-edx-1',
         'PyJWT==0.2.1'
     ]
 )
