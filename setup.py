@@ -20,7 +20,7 @@ setup(
     ],
     packages=['oauth2_provider'],
     dependency_links=[
-        'git+https://github.com/edx/django-oauth2-provider@0.2.7-dev-edx.1#egg=django-oauth2-provider-0.2.7-fork-edx-1',
+        'git+https://github.com/edx/django-oauth2-provider@0.2.7-fork-edx-1#egg=django-oauth2-provider-0.2.7-fork-edx-1',
     ],
     install_requires=[
         'django-oauth2-provider==0.2.7-fork-edx-1',
