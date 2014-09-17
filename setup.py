@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='edx-oauth2-provider',
-    version='0.2.0',
+    version='0.2.1',
     description='Provide OAuth2 access to edX installations',
     author='edX',
     url='https://github.com/edx/edx-oauth2-provider',
