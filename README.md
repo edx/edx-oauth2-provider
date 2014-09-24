@@ -1,4 +1,4 @@
-edX OAuth2 Provider
+edX OAuth2 Provider [![Build Status](https://travis-ci.org/edx/edx-oauth2-provider.svg?branch=master)](https://travis-ci.org/edx/edx-oauth2-provider) [![Coverage Status](https://coveralls.io/repos/edx/edx-oauth2-provider/badge.png?branch=master)](https://coveralls.io/r/edx/edx-oauth2-provider?branch=master)
 ===================
 OAuth2 provider for edX Platform.
 
