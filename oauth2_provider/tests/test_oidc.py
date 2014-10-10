@@ -1,17 +1,19 @@
 # pylint: disable=missing-docstring
 
 import datetime
+import json
 import uuid
 
 from django.conf import settings
 from django.test.utils import override_settings
 
+import jwt
 import mock
 
 from provider.scope import check
-
+import oauth2_provider.oidc as oidc
 from oauth2_provider import constants
-from oauth2_provider.oidc import id_token_claims, encode_claims, userinfo_claims
+from oauth2_provider.oidc.core import IDToken
 from oauth2_provider.tests.base import OAuth2TestCase
 from oauth2_provider.tests.factories import AccessTokenFactory
 
@@ -28,16 +30,17 @@ class BaseTestCase(OAuth2TestCase):
 
 
 class IdTokenTest(BaseTestCase):
-    def _get_actual_id_token(self, access_token, nonce):
+    def _get_actual_claims(self, access_token, nonce):
         with mock.patch('oauth2_provider.oidc.handlers.datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = BASE_DATETIME
-            id_token = id_token_claims(access_token, nonce)
+            id_token = oidc.id_token(access_token, nonce)
 
-            self.assertIn('sub', id_token)
-            id_token['sub'] = None  # clear id token since a handler can change it
-            return id_token
+            # Clear id token since a handler can change it.
+            id_token.claims['sub'] = None
 
-    def _get_expected_id_token(self, access_token, nonce):
+            return id_token.claims
+
+    def _get_expected_claims(self, access_token, nonce):
         client = access_token.client
 
         # Basic OpenID Connect ID token claims
@@ -69,28 +72,25 @@ class IdTokenTest(BaseTestCase):
 
         return expected
 
-    def _encode_id_token(self, token, secret):
-        # Sort using keys to avoid errors in comparison. Equivalent
-        # dictionaries will get different JSON strings if the order of
-        # the keys in their internal representation is different.
-        token = dict([(k, token[k]) for k in sorted(token.keys())])
-
-        return encode_claims(token, secret)
+    def _decode(self, id_token):
+        return jwt.decode(id_token, 'test_secret', verify_expiration=False)
 
     def test_get_id_token(self):
-        claims = self._get_actual_id_token(self.access_token, self.nonce)
-        expected = self._get_expected_id_token(self.access_token, self.nonce)
-        self.assertEqual(claims, expected)
-        self.assertEqual(self._encode_id_token(claims, 'test_secret'),
-                         self._encode_id_token(expected, 'test_secret'))
+        actual = self._get_actual_claims(self.access_token, self.nonce)
+        expected = self._get_expected_claims(self.access_token, self.nonce)
+
+        self.assertEqual(actual, expected)
+
+        encoded = IDToken(self.access_token, scopes=[], claims=actual).encode('test_secret')
+        self.assertEqual(self._decode(encoded), expected)
 
     def test_get_id_token_with_profile(self):
         # Add the profile scope to access token
         self.access_token.scope |= constants.PROFILE_SCOPE
         self.access_token.save()
 
-        claims = self._get_actual_id_token(self.access_token, self.nonce)
-        expected = self._get_expected_id_token(self.access_token, self.nonce)
+        claims = self._get_actual_claims(self.access_token, self.nonce)
+        expected = self._get_expected_claims(self.access_token, self.nonce)
         self.assertEqual(claims, expected)
 
     def test_get_id_token_with_profile_and_email(self):
@@ -98,8 +98,8 @@ class IdTokenTest(BaseTestCase):
         self.access_token.scope |= constants.PROFILE_SCOPE | constants.EMAIL_SCOPE
         self.access_token.save()
 
-        claims = self._get_actual_id_token(self.access_token, self.nonce)
-        expected = self._get_expected_id_token(self.access_token, self.nonce)
+        claims = self._get_actual_claims(self.access_token, self.nonce)
+        expected = self._get_expected_claims(self.access_token, self.nonce)
         self.assertEqual(claims, expected)
 
 
@@ -127,29 +127,26 @@ class UserInfoTest(BaseTestCase):
         self.access_token.scope |= constants.PROFILE_SCOPE
         self.access_token.save()
 
-        claims = userinfo_claims(
-            self.access_token,
-            scope_names=['openid'],  # it should not matter if we don't add 'profile'
-            claims_request={'userinfo': {'preferred_username': {'value': 'pedro'}}},
-        )
+        claims_request = {'userinfo': {'preferred_username': {'value': 'pedro'}}}
+        claims = userinfo_claims(self.access_token, claims_request=claims_request)
 
         self.assertEqual(claims['preferred_username'], self.user.username)
         self.assertIn('sub', claims)
         self.assertEqual(len(claims), 2)  # should not return any more claims
 
     def test_not_recognized_values(self):
-        claims = userinfo_claims(
+        id_token = oidc.userinfo(
             self.access_token,
-            scope_names=['openid'],  # it should not matter if we don't add 'profile'
+            scope_request=['openid'],  # it should not matter if we don't add 'profile'
             claims_request={'userinfo': {'foo': {'value': 'bar'}}},
         )
 
-        self.assertIn('sub', claims)
-        self.assertEqual(len(claims), 1)
+        self.assertIn('sub', id_token.claims)
+        self.assertEqual(len(id_token.claims), 1)
 
     def test_arguments(self):
         """ Test if the responses contain the requested claims according to permissions"""
-        # TODO: repplace with DDT test
+        # TODO: replace with DDT test
 
         def userinfo_req(req):
             return {'userinfo': req}
@@ -161,10 +158,10 @@ class UserInfoTest(BaseTestCase):
         claims = userinfo_claims(self.access_token)
         self.assertIncludedClaims(claims, ['profile'])
 
-        claims = userinfo_claims(self.access_token, scope_names=['openid', 'profile', 'email'])
+        claims = userinfo_claims(self.access_token, scope_request=['openid', 'profile', 'email'])
         self.assertIncludedClaims(claims, ['profile'])
 
-        claims = userinfo_claims(self.access_token, scope_names=['openid', 'email'])
+        claims = userinfo_claims(self.access_token, scope_request=['openid', 'email'])
         self.assertIncludedClaims(claims)
 
         claims = userinfo_claims(
@@ -173,18 +170,18 @@ class UserInfoTest(BaseTestCase):
         )
         self.assertIncludedClaims(claims, expected_claims=['preferred_username'])
 
-        claims = userinfo_claims(self.access_token, scope_names=['email'])
+        claims = userinfo_claims(self.access_token, scope_request=['email'])
         self.assertIncludedClaims(claims)
 
         claims = userinfo_claims(
             self.access_token,
-            scope_names=['profile'],
+            scope_request=['profile'],
             claims_request=userinfo_req({'preferred_username': None})
         )
         self.assertIncludedClaims(claims, ['profile'])
 
         claims = userinfo_claims(
-            self.access_token, scope_names=['email'],
+            self.access_token, scope_request=['email'],
             claims_request=userinfo_req({'preferred_username': None})
         )
         self.assertIncludedClaims(claims, expected_claims=['preferred_username'])
@@ -208,10 +205,15 @@ class UserInfoTest(BaseTestCase):
 
         claims = userinfo_claims(
             self.access_token,
-            scope_names=['email'],
+            scope_request=['email'],
             claims_request=userinfo_req({'preferred_username': None})
         )
         self.assertIncludedClaims(claims, ['email'], ['preferred_username'])
 
         claims = userinfo_claims(self.access_token)
         self.assertIncludedClaims(claims, ['profile', 'email'])
+
+
+def userinfo_claims(access_token, scope_request=None, claims_request=None):
+    id_token = oidc.userinfo(access_token, scope_request, claims_request)
+    return id_token.claims
