@@ -1,110 +1,153 @@
 """
 OpenID Connect core related utility functions.
 
+Defines utility functions to process the ID Token and UserInfo
+endpoints according to the OpenID Connect specification.
+
 """
 
 import jwt
 
+import provider.scope
+
 from oauth2_provider import constants
 from oauth2_provider.utils import import_string
-from oauth2_provider.oidc.collect import collect, collect_authorized_scope
-
-# Resolve the claim handlers
-ID_TOKEN_HANDLERS = [import_string(cls) for cls in constants.ID_TOKEN_HANDLERS]
-USERINFO_HANDLERS = [import_string(cls) for cls in constants.USERINFO_HANDLERS]
+from oauth2_provider.oidc.collect import collect
 
 
-def authorized_scopes(scope_names, user, client):
+HANDLERS = {
+    'id_token': [import_string(cls) for cls in constants.ID_TOKEN_HANDLERS],
+    'userinfo': [import_string(cls) for cls in constants.USERINFO_HANDLERS]
+}
+
+
+class IDToken(object):
     """
-    Returns only the scopes that are  authorized for the user or client.
+    Simple container for OpenID Connect related responses.
 
-    The authorization is determined by the `id_token` handlers.
+    Attributes:
+        access_token (:class:`AccessToken`): Associated Access Token object.
+        scopes (list): List of scope names.
+        claims (dict): Dictionary of claim names and values.
+
+    """
+
+    def __init__(self, access_token, scopes, claims):
+        self.access_token = access_token
+        self.scopes = scopes
+        self.claims = claims
+
+    def encode(self, secret, algorithm='HS256'):
+        """
+        Encode the set of claims to the JWT (JSON Web Token) format
+        according to the OpenID Connect specification:
+
+        http://openid.net/specs/openid-connect-basic-1_0.html#IDToken
+
+        Arguments:
+            claims (dict): A dictionary with the OpenID Connect claims.
+            secret (str): Secret used to encode the id_token.
+            algorithm (str): Algorithm used for encoding.
+                Defaults to HS256.
+
+        Returns encoded JWT token string.
+
+        """
+
+        return jwt.encode(self.claims, secret, algorithm)
+
+
+def id_token(access_token, nonce=None, claims_request=None):
+    """
+    Returns data required for an OpenID Connect ID Token according to:
+
+    - http://openid.net/specs/openid-connect-basic-1_0.html#IDToken
 
     Arguments:
-        scope_names (list): List of scope names.
-        user (User): User for the request.
-        client (Client): OAuth2 Client for the request.
-
-    """
-    handlers = ID_TOKEN_HANDLERS
-
-    return collect_authorized_scope(handlers, scope_names, user, client)
-
-
-def id_token_claims(access_token, nonce=None, claims_request=None):
-    """
-    Creates claims data for an OpenID Connect ID Token according to:
-
-    http://openid.net/specs/openid-connect-basic-1_0.html#IDToken
-
-    Arguments:
-        access_token (AccessToken): Associated OAuth2 access token.
+        access_token (:class:`AccessToken`): Associated OAuth2 access token.
         nonce (str): Optional nonce to protect against replay attacks.
-        claims_request (dict): Optional dictionary with a claims request parameter.
+        claims_request (dict): Optional dictionary with the claims request parameters.
 
-    Information on the claims request parameter specification:
+    Information on the `claims_request` parameter specification:
 
-    http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
+    - http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
 
-    Returns dictionary of the claims required by the specification.
+    Returns an :class:`IDToken` instance with the scopes from the
+    access_token and the corresponding claims. Claims in the
+    `claims_request` paramater id_token section will be included *in
+    addition* to the ones corresponding to the scopes specified in the
+    `access_token`.
 
     """
 
-    claims = claims_request.get('id_token', {}) if claims_request else {}
+    handlers = HANDLERS['id_token']
 
-    handlers = ID_TOKEN_HANDLERS
+    # Select only the relevant section of the claims request.
+    claims_request_section = claims_request.get('id_token', {}) if claims_request else {}
+
+    scope_request = provider.scope.to_names(access_token.scope)
 
     if nonce:
-        claims.update({'nonce': {'value': nonce}})
+        claims_request_section.update({'nonce': {'value': nonce}})
 
-    result = collect(handlers, access_token, claims=claims, inclusive=True)
+    scopes, claims = collect(
+        handlers,
+        access_token,
+        scope_request=scope_request,
+        claims_request=claims_request_section,
+    )
 
-    return result
+    return IDToken(access_token, scopes, claims)
 
 
-def userinfo_claims(access_token, scope_names=None, claims_request=None):
+def userinfo(access_token, scope_request=None, claims_request=None):
     """
-    Creates claims data for OpenID Connect UserInfo endpoint, according:
+    Returns data required for an OpenID Connect UserInfo response, according to:
 
     http://openid.net/specs/openid-connect-basic-1_0.html#UserInfoResponse
 
-    Support scope and claims request parameter as described in:
+    Supports scope and claims request parameter as described in:
 
-    http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
-    http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
+    - http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
+    - http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
 
-    Arguments:
-        access_token (AccessToken): Associated access token
-        scope_names (list): Optional list of requested scopes
-        claims_request (dict): Optional dictionary with a claims request parameter
+    Arguments: access_token (:class:`AccessToken`): Associated access
+        token.  scope_request (list): Optional list of requested
+        scopes. Only scopes authorized in the `access_token` will be
+            considered.  claims_request
+        (dict): Optional dictionary with a claims request parameter.
 
     Information on the claims request parameter specification:
 
-    http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
+    - http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
 
-    Returns dictionary of the claims required by the specification.
+    As a convinience, if neither `scope_request` or user_info claim is
+    specified in the `claims_request`, it will return the claims for
+    all the scopes in the `access_token`.
+
+    Returns an :class:`IDToken` instance with the scopes from the
+    `scope_request` and the corresponding claims. Claims in the
+    `claims_request` paramater userinfo section will be included *in
+    addition* to the ones corresponding to `scope_request`.
 
     """
 
-    handlers = USERINFO_HANDLERS
+    handlers = HANDLERS['userinfo']
 
-    claims = claims_request.get('userinfo', {}) if claims_request else {}
+    # Select only the relevant section of the claims request.
+    claims_request_section = claims_request.get('userinfo', {}) if claims_request else {}
 
-    result = collect(handlers, access_token, scope_names, claims, inclusive=False)
-    return result
+    # If nothing is requested, return the claims for the scopes in the access token.
+    if not scope_request and not claims_request_section:
+        scope_request = provider.scope.to_names(access_token.scope)
+    else:
+        scope_request = scope_request
 
+    scopes, claims = collect(
+        handlers,
+        access_token,
+        scope_request=scope_request,
+        claims_request=claims_request_section,
+    )
 
-def encode_claims(claims, secret, algorithm='HS256'):
-    """
-    Encode an set of claims according to the OpenID Connect
-    specification, which is used to create ID Tokens:
-
-    http://openid.net/specs/openid-connect-basic-1_0.html#IDToken
-
-    Arguments:
-        id_token (dict): A dictionary with the OpenID Connect claims
-        secret (str): Secret used to encode the id_token
-
-    Returns encoded JWT token string.
-    """
-    return jwt.encode(claims, secret, algorithm)
+    return IDToken(access_token, scopes, claims)

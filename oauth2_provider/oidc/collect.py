@@ -1,9 +1,8 @@
 """
-Functions to dispach OpenID Connect scopes and claim request to
-claim handlers.
+Functions to collect OpenID Connect values from claim handlers.
 
 For details on the format of the claim handlers, see
-`oauth2_provider.oicd.handlers`
+:mod:`oauth2_provider.oicd.handlers`
 
 None: The functions in this module assume the `openid` scope is implied.
 
@@ -17,74 +16,81 @@ REQUIRED_SCOPES = ['openid']
 CLAIM_REQUEST_FIELDS = ['value', 'values', 'essential']
 
 
-def collect(handlers, access_token, scopes=None, claims=None, inclusive=True):
+def collect(handlers, access_token, scope_request=None, claims_request=None):
     """
-    Collect all the claims associated with the `access_token` scope for
-    the specified handler.
+    Collect all the claims values from the `handlers`.
 
     Arguments:
+      handlers (list): List of claim :class:`Handler` classes.
+      access_token (:class:AccessToken): Associated access token.
+      scope_request (list): List of requested scopes.
+      claims_request (dict): Dictionary with only the relevant section of a
+          OpenID Connect claims request.
 
-      handlers (list): List of claim handler classes.
-      access_token (AccessToken): Associated access token.
-      scopes (list): List of requested scopes.
-      claims (dict): Dictionary of requested claims and values.
-      inclusive (bool): Include all authorized claims, defaults
-        to False except if `scope` and `claims` parameters are
-        not specified.
-
-    Returns dictionary with values for the collected claims.
+    Returns a list of the scopes from `scope_request` that are authorized, and a
+    dictionary of the claims associated with the authorized scopes in
+    `scope_request`, and additionally, the authorized claims listed in
+    `claims_request`.
 
     """
     user = access_token.user
     client = access_token.client
 
-    scopes = set() if scopes is None else set(scopes)
+    # Instantiate handlers. Each handler is instanciated only once, allowing the
+    # handler to keep state in-between calls to its scope and claim methods.
 
-    # In `collect` the 'openid' scope is implied
-    if scopes and 'openid' in scopes:
-        scopes.remove('openid')
+    handlers = [cls() for cls in handlers]
 
-    claims = validate_claim_request(claims)
+    # Find all authorized scopes by including the access_token scopes.  Note
+    # that the handlers determine if a scope is authorized, not its presense in
+    # the access_token.
 
-    # Add all authorized claims if no scope or claims are requested
-    if not(scopes or claims):
-        inclusive = True
+    required_scopes = set(REQUIRED_SCOPES)
+    token_scopes = set(provider.scope.to_names(access_token.scope))
+    authorized_scopes = _collect_scopes(handlers, required_scopes | token_scopes, user, client)
 
-    required_claims = collect_claim_names(handlers, REQUIRED_SCOPES, user, client)
+    # Select only the authorized scopes from the requested scopes.
 
-    authorized_scopes = set(provider.scope.to_names(access_token.scope))
-    authorized_claims = collect_claim_names(handlers, authorized_scopes, user, client)
+    scope_request = set(scope_request) if scope_request else set()
+    scopes = required_scopes | (authorized_scopes & scope_request)
 
-    requested_claims = set()
-    if inclusive:
-        requested_claims.update(authorized_claims)
-    else:
-        requested_claims = collect_claim_names(handlers, scopes, user, client)
-        requested_claims.update(claims.keys())
+    # Find all authorized claims names for the authorized_scopes.
 
-    # Remove all claims that are not part of the authorized scope
-    claim_names = required_claims | (requested_claims & authorized_claims)
+    authorized_names = _collect_names(handlers, authorized_scopes, user, client)
 
-    claim_results = collect_claim_values(
+    # Select only the requested claims if no scope has been requested. Selecting
+    # scopes has prevalence over selecting claims.
+
+    claims_request = _validate_claim_request(claims_request)
+
+    # Add the requested claims that are authorized to the response.
+
+    requested_names = set(claims_request.keys()) & authorized_names
+    names = _collect_names(handlers, scopes, user, client) | requested_names
+
+    # Get the values for the claims.
+
+    claims = _collect_values(
         handlers,
-        names=claim_names,
+        names=names,
         user=user,
         client=client,
-        values=claims or {}
+        values=claims_request or {}
     )
 
-    return claim_results
+    return authorized_scopes, claims
 
 
-def collect_authorized_scope(handlers, scopes, user, client):
-    """ Get a set of all the authorized scopes according to the handlers """
+def _collect_scopes(handlers, scopes, user, client):
+    """ Get a set of all the authorized scopes according to the handlers. """
     results = set()
 
     data = {'user': user, 'client': client}
 
     def visitor(scope_name, func):
         claim_names = func(data)
-        if claim_names:
+        # If the claim_names is None, it means that the scope is not authorized.
+        if claim_names is not None:
             results.add(scope_name)
 
     _visit_handlers(handlers, visitor, 'scope', scopes)
@@ -92,22 +98,25 @@ def collect_authorized_scope(handlers, scopes, user, client):
     return results
 
 
-def collect_claim_names(handlers, scopes, user, client):
+def _collect_names(handlers, scopes, user, client):
     """ Get the names of the claims supported by the handlers for the requested scope. """
+
     results = set()
 
     data = {'user': user, 'client': client}
 
     def visitor(_scope_name, func):
         claim_names = func(data)
-        results.update(claim_names if claim_names else [])
+        # If the claim_names is None, it means that the scope is not authorized.
+        if claim_names is not None:
+            results.update(claim_names)
 
     _visit_handlers(handlers, visitor, 'scope', scopes)
 
     return results
 
 
-def collect_claim_values(handlers, names, user, client, values):
+def _collect_values(handlers, names, user, client, values):
     """ Get the values from the handlers of the requested claims. """
 
     results = {}
@@ -116,6 +125,7 @@ def collect_claim_values(handlers, names, user, client, values):
         data = {'user': user, 'client': client}
         data.update(values.get(claim_name) or {})
         claim_value = func(data)
+        # If the claim_value is None, it means that the claim is not authorized.
         if claim_value is not None:
             # New values overwrite previous results
             results[claim_name] = claim_value
@@ -125,12 +135,12 @@ def collect_claim_values(handlers, names, user, client, values):
     return results
 
 
-def validate_claim_request(claims, ignore_errors=False):
+def _validate_claim_request(claims, ignore_errors=False):
     """
     Validates a claim request section (`userinfo` or `id_token`) according
     to section 5.5 of the OpenID Connect specification:
 
-    http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
+    - http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
 
     Returns a copy of the claim request with only the valid fields and values.
 
@@ -169,8 +179,6 @@ def _validate_claim_values(name, value, ignore_errors):
 
 def _visit_handlers(handlers, visitor, preffix, suffixes):
     """ Use visitor partern to collect information from handlers """
-
-    handlers = [cls() for cls in handlers]
 
     results = []
     for handler in handlers:
