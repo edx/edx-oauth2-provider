@@ -48,25 +48,31 @@ class BaseTestCase(TestCase):
 class OAuth2TestCase(BaseTestCase):
     def setUp(self):
         super(OAuth2TestCase, self).setUp()
-        self.payload = {
+
+    def login_and_authorize(self, scope=None, claims=None, trusted=False):
+        """ Login into client using OAuth2 authorization flow. """
+
+        self.set_trusted(self.auth_client, trusted)
+        self.client.login(username=self.user.username, password=self.password)
+
+        payload = {
             'client_id': self.auth_client.client_id,
             'redirect_uri': self.auth_client.redirect_uri,
             'response_type': 'code',
             'state': 'some_state',
         }
+        _add_values(payload, 'id_token', scope, claims)
 
-    def login_and_authorize(self, trusted=False):
-        """ Login into client using OAuth2 authorization flow. """
+        response = self.client.get(reverse('oauth2:capture'), payload)
+        self.assertEqual(302, response.status_code)
 
-        self.set_trusted(self.auth_client, trusted)
-        self.client.login(username=self.user.username, password=self.password)
-        self.client.get(reverse('oauth2:capture'), self.payload)
-        response = self.client.get(reverse('oauth2:authorize'), self.payload)
+        response = self.client.get(reverse('oauth2:authorize'), payload)
+
         return response
 
-    def get_new_access_token_response(self):
+    def get_access_token_response(self, scope=None, claims=None):
         """ Get a new access token using the OAuth2 authorization flow. """
-        response = self.login_and_authorize(trusted=True)
+        response = self.login_and_authorize(scope, claims, trusted=True)
         self.assertEqual(302, response.status_code)
         self.assertEqual(reverse('oauth2:redirect'), normpath(response['Location']))
 
@@ -75,30 +81,25 @@ class OAuth2TestCase(BaseTestCase):
 
         query = QueryDict(urlparse(response['Location']).query)
 
-        response = self.client.post(reverse('oauth2:access_token'), {
+        payload = {
             'grant_type': 'authorization_code',
             'client_id': self.auth_client.client_id,
             'client_secret': self.client_secret,
             'code': query['code'],
-        })
+        }
+        _add_values(payload, 'id_token', scope, claims)
 
+        response = self.client.post(reverse('oauth2:access_token'), payload)
         return response
 
 
 class IDTokenTestCase(OAuth2TestCase):
-    def set_scope(self, scope):
-        if scope is None and 'scope' in self.payload:
-            del self.payload['scope']
-        else:
-            self.payload['scope'] = scope
-
-    def get_new_id_token_values(self, scope):
+    def get_id_token_values(self, scope=None, claims=None):
         """ Get a new id_token using the OIDC authorization flow. """
 
         self.assertIn('openid', scope.split())
 
-        self.set_scope(scope)
-        response = self.get_new_access_token_response()
+        response = self.get_access_token_response(scope, claims)
         self.assertEqual(response.status_code, 200)
 
         values = json.loads(response.content)
@@ -140,30 +141,25 @@ class UserInfoTestCase(BaseTestCase):
 
     def set_access_token_scope(self, scope):
         self.access_token.scope = provider.scope.to_int(*scope.split())
-        self.access_token.save()
+        self.access_token.save()  # pylint: disable=no-member
 
-    def get_with_authorization(self, path, access_token=None, data=None):
-        data = data if data else {}
-
+    def get_with_authorization(self, path, access_token=None, payload=None):
         kwargs = {}
         if access_token:
             kwargs['HTTP_AUTHORIZATION'] = 'Bearer %s' % access_token
 
-        return self.client.get(path, data, **kwargs)
+        return self.client.get(path, payload, **kwargs)
 
     def get_userinfo(self, token=None, scope=None, claims=None):
-        data = {}
-
-        if scope:
-            data.update({'scope': scope})
-
-        if claims:
-            data.update({
-                'claims': json.dumps({
-                    'userinfo': claims
-                })
-            })
-
-        response = self.get_with_authorization(self.path, token, data)
+        payload = _add_values({}, 'userinfo', scope, claims)
+        response = self.get_with_authorization(self.path, token, payload)
         values = json.loads(response.content)
         return response, values
+
+
+def _add_values(data, endpoint, scope=None, claims=None):
+    if scope:
+        data['scope'] = scope
+    if claims:
+        data['claims'] = json.dumps({endpoint: claims})
+    return data

@@ -78,4 +78,18 @@ INSTALLED_APPS = (
     'oauth2_provider',
 )
 
-OAUTH_OIDC_ISSUER = 'https://example.test/oauth2'
+OAUTH_OIDC_ISSUER = 'https://example.com/oauth2'
+
+OAUTH_OIDC_ID_TOKEN_HANDLERS = (
+    'oauth2_provider.oidc.handlers.BasicIDTokenHandler',
+    'oauth2_provider.oidc.handlers.ProfileHandler',
+    'oauth2_provider.oidc.handlers.EmailHandler',
+    'oauth2_provider.tests.handlers.TestHandler'
+)
+
+OAUTH_OIDC_USERINFO_HANDLERS = (
+    'oauth2_provider.oidc.handlers.BasicUserInfoHandler',
+    'oauth2_provider.oidc.handlers.ProfileHandler',
+    'oauth2_provider.oidc.handlers.EmailHandler',
+    'oauth2_provider.tests.handlers.TestHandler'
+)

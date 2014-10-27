@@ -54,16 +54,26 @@ class UserInfoViewTest(UserInfoTestCase):
         self.set_access_token_scope(valid_scope)
 
         token = self.access_token.token
-        requested_scope = 'openid whatever'
-        requested_claims = {
+
+        scope_request = 'openid whatever'
+        claims_request = {
             'name': None,
             'foo': {'value': 'one'},
-            'what': {'values': ['one', 'two']}
+            'what': {'values': ['one', 'two']},
         }
 
-        response, claims = self.get_userinfo(token, requested_scope, requested_claims)
+        response, claims = self.get_userinfo(token, scope_request, claims_request)
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('sub', claims)
         self.assertIn('name', claims)
         self.assertEqual(len(claims), 2)
+
+        scope_request = 'openid profile'
+        claims_request = {
+            'test': {'essential': True}
+        }
+
+        response, claims = self.get_userinfo(token, scope_request, claims_request)
+
+        self.assertIn('test', claims)
