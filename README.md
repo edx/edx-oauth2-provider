@@ -11,7 +11,7 @@ Usage
 The OAuth2 clients must be registered to obtain their `client_id` and `client_secret`. The registration can be done using the
 `/admin` web interface by adding new entries to the OAuth2 Clients table.
 
-Apart from the two basic OAuth2 client types (_public_ and _confidential_), this provider as a notion of a _trusted_
+Apart from the two basic OAuth2 client types (_public_ and _confidential_), this provider has a notion of a _trusted_
 client. Trusted clients do not require user consent for accessing user resources, and will not show up the approval
 page during the sign-in process. To make a client trusted after it has been created, add it to the OAuth2-provider
 `TrustedModel` tables using the `/admin` web interface.
