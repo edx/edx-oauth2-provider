@@ -32,8 +32,14 @@ different value.
 
 It is possible to customize the OpenID Connect scopes and claims, using the settings `OAUTH_OIDC_ID_TOKEN_HANDLERS`
 and `OAUTH_OIDC_USERINFO_HANDLERS`, which manage the claims associated with the `id_token` during authorization, and
-the results of the `userinfo` endpoint respectively. For more information see `oauth2_profider/oidc/handlers.py`.
+the results of the `userinfo` endpoint respectively. For more information see `oauth2_provider/oidc/handlers.py`.
 
+
+### Adding new OpenID Connect scopes
+
+Currently, because of a limitation of `django-oauth2-provider`, new scopes have to manually be added to the
+value of `SCOPES` in `oauth2_provider/constants.py`. Future work could address this problem by making the
+configuration of new scopes occur dynamically or via registration.
 
 Testing
 -------
