@@ -80,7 +80,14 @@ class PasswordGrantForm(provider.oauth2.forms.PasswordGrantForm):
             except User.DoesNotExist:
                 user = None
 
-        if user is None or not user.is_active:
+        if (
+            user is None
+            # TODO This is a temporary workaround while the is_active field on the
+            # user is coupled with whether or not the user has verified ownership
+            # of their claimed email address.  Once is_active is decoupled from
+            # verified_email, we can uncomment the following line.
+            # or not user.is_active
+        ):
             raise OAuthValidationError({'error': 'invalid_grant'})
 
         data['user'] = user
