@@ -107,7 +107,8 @@ class IDTokenTestCase(OAuth2TestCase):
 
         id_token = values['id_token']
         secret = self.auth_client.client_secret
-        self.assertValidIDToken(id_token, secret)
+        audience = self.auth_client.client_id
+        self.assertValidIDToken(id_token, secret, audience)
 
         scopes = values['scope'].split()
         claims = self.parse_id_token(id_token)
@@ -122,9 +123,9 @@ class IDTokenTestCase(OAuth2TestCase):
         claims = jwt.decode(id_token, verify=False)
         return claims
 
-    def assertValidIDToken(self, id_token, secret):
+    def assertValidIDToken(self, id_token, secret, audience):
         try:
-            jwt.decode(id_token, secret)
+            jwt.decode(id_token, secret, audience=audience)
         except jwt.DecodeError:
             assert False
 
