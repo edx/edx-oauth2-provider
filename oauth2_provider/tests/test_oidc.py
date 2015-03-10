@@ -72,8 +72,8 @@ class IdTokenTest(BaseTestCase):
 
         return expected
 
-    def _decode(self, id_token):
-        return jwt.decode(id_token, 'test_secret', verify_expiration=False)
+    def _decode(self, id_token, audience):
+        return jwt.decode(id_token, 'test_secret', audience=audience, verify_expiration=False)
 
     def test_get_id_token(self):
         actual = self._get_actual_claims(self.access_token, self.nonce)
@@ -82,7 +82,7 @@ class IdTokenTest(BaseTestCase):
         self.assertEqual(actual, expected)
 
         encoded = IDToken(self.access_token, scopes=[], claims=actual).encode('test_secret')
-        self.assertEqual(self._decode(encoded), expected)
+        self.assertEqual(self._decode(encoded, actual['aud']), expected)
 
     def test_get_id_token_with_profile(self):
         # Add the profile scope to access token
