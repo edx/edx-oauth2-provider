@@ -11,8 +11,7 @@ import provider.oauth2.views
 import provider.oauth2.forms
 import provider.scope
 from provider.oauth2.models import AccessToken
-from provider.oauth2.views import OAuthError
-from provider.oauth2.views import Capture, Redirect  # pylint: disable=unused-import
+from provider.oauth2.views import OAuthError, Capture, Redirect  # pylint: disable=unused-import
 
 import oauth2_provider.oidc as oidc
 from oauth2_provider import constants
