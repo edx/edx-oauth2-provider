@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='edx-oauth2-provider',
-    version='0.5.2',
+    version='0.5.3',
     description='Provide OAuth2 access to edX installations',
     author='edX',
     url='https://github.com/edx/edx-oauth2-provider',
@@ -18,7 +18,7 @@ setup(
         'Programming Language :: Python',
         'Framework :: Django',
     ],
-    packages=['oauth2_provider'],
+    packages=find_packages(exclude=['tests', '*.tests']),
     dependency_links=[
         'git+https://github.com/edx/django-oauth2-provider@0.2.7-fork-edx-5#egg=django-oauth2-provider-0.2.7-fork-edx-5',
     ],
