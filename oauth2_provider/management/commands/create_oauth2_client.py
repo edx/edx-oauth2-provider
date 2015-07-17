@@ -1,7 +1,6 @@
 import json
 from optparse import make_option
 
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.validators import URLValidator
@@ -10,6 +9,13 @@ from provider.oauth2.models import Client
 
 from oauth2_provider.models import TrustedClient
 
+
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:  # Django <1.5
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
 
 ARG_STRING = '<url> <redirect_uri> <client_type: "confidential" | "public">'
 
