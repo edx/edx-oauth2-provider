@@ -73,11 +73,28 @@ class Command(BaseCommand):
         self._clean_args(args)
         self._parse_options(options)
 
+        client_id = self.fields.get('client_id')
         trusted = self.fields.pop('trusted')
-        client = Client.objects.create(**self.fields)
+
+        # Check if client ID is already in use. If so, fetch existing Client and update fields.
+        client_id_claimed = Client.objects.filter(client_id=client_id).exists()
+        if client_id_claimed:
+            client = Client.objects.get(client_id=client_id)
+            
+            for key, value in self.fields.items():
+                setattr(client, key, value)
+
+            client.save()
+        else:
+            client = Client.objects.create(**self.fields)
 
         if trusted:
-            TrustedClient.objects.create(client=client)
+            TrustedClient.objects.get_or_create(client=client)
+        else:
+            try:
+                TrustedClient.objects.get(client=client).delete()
+            except TrustedClient.DoesNotExist:
+                pass
 
         serialized = json.dumps(client.serialize(), indent=4)
         self.stdout.write(serialized)
