@@ -119,6 +119,7 @@ class CreateOauth2ClientTests(TestCase):
         self.assertIn('Client type provided is invalid.', e.exception.message)
 
     def test_username_mismatch(self):
+        """Verify that the command fails when the provided username is invalid."""
         with assert_raises(CommandError) as e:
             self._call_command(
                 (self.URL, self.REDIRECT_URI, self.CLIENT_TYPES[0]),
@@ -126,3 +127,30 @@ class CreateOauth2ClientTests(TestCase):
             )
 
         self.assertIn('User matching the provided username does not exist.', e.exception.message)
+
+    def test_idempotency(self):
+        """Verify that the command can be run repeatedly with the same client ID, without any ill effects."""
+        args = [self.URL, self.REDIRECT_URI, self.CLIENT_TYPES[0]]
+        options = {
+            'username': None,
+            'client_name': 'name',
+            'client_id': 'id',
+            'client_secret': 'secret',
+            'trusted': True
+        }
+
+        self.assert_client_created(args, options)
+
+        # Verify that the command is idempotent.
+        self.assert_client_created(args, options)
+
+        # Verify that attributes are updated if the command is run with the same client ID,
+        # but with other options varying.
+        options['client_secret'] = 'another-secret'
+        self.assert_client_created(args, options)
+
+        # Verify that the TrustedClient is deleted if the command is run with the same
+        # client ID, but with the "--trusted" flag excluded.
+        options['trusted'] = False
+        self.assert_client_created(args, options)
+        self.assertEqual(len(TrustedClient.objects.all()), 0)
