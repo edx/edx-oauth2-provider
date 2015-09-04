@@ -10,8 +10,9 @@ import oauth2_provider.models
 
 
 class UserFactory(DjangoModelFactory):
-    FACTORY_FOR = User
-    FACTORY_DJANGO_GET_OR_CREATE = ('username', )
+    class Meta:
+        model = User
+        django_get_or_create = ('username', )
 
     username = factory.Sequence(u'robot_{0}'.format)
     email = factory.Sequence(u'robot_{0}@edx.org'.format)
@@ -26,7 +27,8 @@ class UserFactory(DjangoModelFactory):
 
 
 class ClientFactory(DjangoModelFactory):
-    FACTORY_FOR = provider.oauth2.models.Client
+    class Meta:
+        model = provider.oauth2.models.Client
 
     client_id = factory.Sequence(u'client_{0}'.format)
     client_secret = 'some_secret'
@@ -37,9 +39,11 @@ class ClientFactory(DjangoModelFactory):
 
 
 class TrustedClientFactory(DjangoModelFactory):
-    FACTORY_FOR = oauth2_provider.models.TrustedClient
+    class Meta:
+        model = oauth2_provider.models.TrustedClient
 
 
 class AccessTokenFactory(DjangoModelFactory):
-    FACTORY_FOR = provider.oauth2.models.AccessToken
-    FACTORY_DJANGO_GET_OR_CREATE = ('user', 'client')
+    class Meta:
+        model = provider.oauth2.models.AccessToken
+        django_get_or_create = ('user', 'client')
