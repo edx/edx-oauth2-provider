@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0003_client'),
+        ('oauth2', '0001_initial'),
     ]
 
     operations = [
