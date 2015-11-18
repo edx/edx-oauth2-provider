@@ -1,4 +1,4 @@
 django>=1.4.12
 PyJWT==1.0.1
 
--e git+https://github.com/edx/django-oauth2-provider.git@0.2.7-fork-edx-5#egg=django-oauth2-provider
+-e git+https://github.com/edx/django-oauth2-provider.git@will/django-1.8-upgrade#egg=django-oauth2-provider==0.2.7-fork-edx-6

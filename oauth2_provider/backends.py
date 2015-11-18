@@ -19,7 +19,7 @@ class PublicPasswordBackend(object):
         if request is None:
             return None
 
-        form = PublicPasswordGrantForm(request.REQUEST)
+        form = PublicPasswordGrantForm(request.POST)
 
         # pylint: disable=no-member
         if form.is_valid():
