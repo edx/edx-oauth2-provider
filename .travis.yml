@@ -9,10 +9,9 @@ install:
     - "pip install -r test_requirements.txt"
 # command to run tests
 script: coverage run ./manage.py test
-branches:
-    only:
-      - master
+
 after_success: coveralls
+
 deploy:
     provider: pypi
     user: edx
