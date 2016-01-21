@@ -3,7 +3,7 @@ edX OAuth2 Provider [![Build Status](https://travis-ci.org/edx/edx-oauth2-provid
 OAuth2 provider for edX Platform.
 
 `oauth2_provider` is a Django application used for authentication and authorization in the edx-platform. The
-authentication mechanism is aligned with the OpenID Connect specification, supporting some of it basic features.
+authentication mechanism is aligned with the OpenID Connect specification, supporting some of its basic features.
 
 Usage
 -----
