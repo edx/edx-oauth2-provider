@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = oauth2_provider
+source = edx_oauth2_provider
 omit =
     **/__init__.py
     **/migrations/*

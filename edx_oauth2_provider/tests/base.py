@@ -10,9 +10,9 @@ import jwt
 
 import provider.scope
 
-from oauth2_provider.models import TrustedClient
-from oauth2_provider.tests.util import normpath
-from oauth2_provider.tests.factories import (
+from ..models import TrustedClient
+from .util import normpath
+from .factories import (
     UserFactory,
     ClientFactory,
     AccessTokenFactory,

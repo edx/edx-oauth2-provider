@@ -7,8 +7,8 @@ from django.core.urlresolvers import reverse
 import ddt
 from provider.constants import CONFIDENTIAL, PUBLIC
 
-from oauth2_provider.tests.base import OAuth2TestCase
-from oauth2_provider.tests.factories import ClientFactory
+from .base import OAuth2TestCase
+from .factories import ClientFactory
 
 USERNAME = 'some_username'
 EMAIL = 'test@example.com'

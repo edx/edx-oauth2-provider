@@ -10,9 +10,9 @@ import jwt
 
 import provider.scope
 
-from oauth2_provider import constants
-from oauth2_provider.utils import import_string
-from oauth2_provider.oidc.collect import collect
+from .. import constants
+from ..utils import import_string
+from .collect import collect
 
 
 HANDLERS = {

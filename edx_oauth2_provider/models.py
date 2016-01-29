@@ -9,7 +9,7 @@ from provider.oauth2.models import Client
 
 # Import constants to force override of `provider.scope`
 # See constants.py for explanation
-import oauth2_provider.constants  # pylint: disable=unused-import
+from . import constants  # pylint: disable=unused-import
 
 
 class TrustedClient(models.Model):
@@ -21,3 +21,6 @@ class TrustedClient(models.Model):
 
     """
     client = models.ForeignKey(Client)
+
+    class Meta(object):
+        db_table = 'oauth2_provider_trustedclient'

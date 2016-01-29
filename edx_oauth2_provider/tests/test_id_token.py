@@ -4,7 +4,7 @@ import json
 
 from django.test.utils import override_settings
 
-from oauth2_provider.tests.base import IDTokenTestCase
+from .base import IDTokenTestCase
 
 ISSUER = 'https://example.com/oauth2'
 

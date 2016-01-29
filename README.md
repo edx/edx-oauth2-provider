@@ -2,7 +2,7 @@ edX OAuth2 Provider [![Build Status](https://travis-ci.org/edx/edx-oauth2-provid
 ===================
 OAuth2 provider for edX Platform.
 
-`oauth2_provider` is a Django application used for authentication and authorization in the edx-platform. The
+`edx_oauth2_provider` is a Django application used for authentication and authorization in the edx-platform. The
 authentication mechanism is aligned with the OpenID Connect specification, supporting some of its basic features.
 
 Usage
@@ -32,13 +32,13 @@ different value.
 
 It is possible to customize the OpenID Connect scopes and claims, using the settings `OAUTH_OIDC_ID_TOKEN_HANDLERS`
 and `OAUTH_OIDC_USERINFO_HANDLERS`, which manage the claims associated with the `id_token` during authorization, and
-the results of the `userinfo` endpoint respectively. For more information see `oauth2_provider/oidc/handlers.py`.
+the results of the `userinfo` endpoint respectively. For more information see `edx_oauth2_provider/oidc/handlers.py`.
 
 
 ### Adding new OpenID Connect scopes
 
 Currently, because of a limitation of `django-oauth2-provider`, new scopes have to manually be added to the
-value of `SCOPES` in `oauth2_provider/constants.py`. Future work could address this problem by making the
+value of `SCOPES` in `edx_oauth2_provider/constants.py`. Future work could address this problem by making the
 configuration of new scopes occur dynamically or via registration.
 
 Testing

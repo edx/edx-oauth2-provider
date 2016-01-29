@@ -5,7 +5,7 @@ OAuth2 provider Django admin interface
 
 from django.contrib import admin
 
-from oauth2_provider.models import TrustedClient
+from .models import TrustedClient
 
 
 class TrustedClientAdmin(admin.ModelAdmin):

@@ -7,7 +7,7 @@ from django.core.validators import URLValidator
 from provider.constants import CONFIDENTIAL, PUBLIC
 from provider.oauth2.models import Client
 
-from oauth2_provider.models import TrustedClient
+from ...models import TrustedClient
 
 
 try:
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         client_id_claimed = Client.objects.filter(client_id=client_id).exists()
         if client_id_claimed:
             client = Client.objects.get(client_id=client_id)
-            
+
             for key, value in self.fields.items():
                 setattr(client, key, value)
 

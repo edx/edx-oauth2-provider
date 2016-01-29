@@ -11,11 +11,11 @@ import jwt
 import mock
 
 from provider.scope import check
-import oauth2_provider.oidc as oidc
-from oauth2_provider import constants
-from oauth2_provider.oidc.core import IDToken
-from oauth2_provider.tests.base import OAuth2TestCase
-from oauth2_provider.tests.factories import AccessTokenFactory
+from .. import oidc
+from .. import constants
+from ..oidc.core import IDToken
+from .base import OAuth2TestCase
+from .factories import AccessTokenFactory
 
 BASE_DATETIME = datetime.datetime(1970, 1, 1)
 
@@ -31,7 +31,7 @@ class BaseTestCase(OAuth2TestCase):
 
 class IdTokenTest(BaseTestCase):
     def _get_actual_claims(self, access_token, nonce):
-        with mock.patch('oauth2_provider.oidc.handlers.datetime') as mock_datetime:
+        with mock.patch('edx_oauth2_provider.oidc.handlers.datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = BASE_DATETIME
             id_token = oidc.id_token(access_token, nonce)
 
