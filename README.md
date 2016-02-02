@@ -5,6 +5,22 @@ OAuth2 provider for edX Platform.
 `edx_oauth2_provider` is a Django application used for authentication and authorization in the edx-platform. The
 authentication mechanism is aligned with the OpenID Connect specification, supporting some of its basic features.
 
+Release notes for v1.0.0
+------------------------
+
+* `oauth2_provider` has been renamed to `edx_oauth2_provider`.  You will need to update your `INSTALLED_APPS` to use
+  the new name, and fix all imports.
+
+* If you are updating from `edx-oauth2-provider-0.5.9` or earlier, you will need to fake-apply the initial migration:
+
+      $ ./manage.py migrate --fake-initial
+
+  If you are installing `edx-oauth2-provider` for the first time, just apply migrations as usual.
+
+  Because the app has been renamed from `oauth2_provider` to `edx_oauth2_provider`, the database migration
+  will show up as a new migration even if it has already been applied.  Faking the initial migration will
+  prevent django from trying to double-create the table for `TrustedClient`.
+
 Usage
 -----
 
