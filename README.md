@@ -19,7 +19,8 @@ Release notes for v1.0.0
 
   Because the app has been renamed from `oauth2_provider` to `edx_oauth2_provider`, the database migration
   will show up as a new migration even if it has already been applied.  Faking the initial migration will
-  prevent django from trying to double-create the table for `TrustedClient`.
+  prevent django from trying to double-create the table for `TrustedClient`.  Failing to do so will result in
+  an error of `django.db.utils.OperationalError: (1050, "Table 'oauth2_provider_trustedclient' already exists")`.
 
 Usage
 -----
