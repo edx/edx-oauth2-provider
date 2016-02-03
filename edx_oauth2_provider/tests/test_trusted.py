@@ -2,8 +2,8 @@
 
 from django.core.urlresolvers import reverse
 
-from oauth2_provider.tests.base import OAuth2TestCase
-from oauth2_provider.tests.util import normpath
+from .base import OAuth2TestCase
+from .util import normpath
 
 
 class TrustedClientTest(OAuth2TestCase):

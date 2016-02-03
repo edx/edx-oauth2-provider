@@ -2,8 +2,25 @@ edX OAuth2 Provider [![Build Status](https://travis-ci.org/edx/edx-oauth2-provid
 ===================
 OAuth2 provider for edX Platform.
 
-`oauth2_provider` is a Django application used for authentication and authorization in the edx-platform. The
+`edx_oauth2_provider` is a Django application used for authentication and authorization in the edx-platform. The
 authentication mechanism is aligned with the OpenID Connect specification, supporting some of its basic features.
+
+Release notes for v1.0.0
+------------------------
+
+* `oauth2_provider` has been renamed to `edx_oauth2_provider`.  You will need to update your `INSTALLED_APPS` to use
+  the new name, and fix all imports.
+
+* If you are updating from `edx-oauth2-provider-0.5.9` or earlier, you will need to fake-apply the initial migration:
+
+      $ ./manage.py migrate --fake-initial
+
+  If you are installing `edx-oauth2-provider` for the first time, just apply migrations as usual.
+
+  Because the app has been renamed from `oauth2_provider` to `edx_oauth2_provider`, the database migration
+  will show up as a new migration even if it has already been applied.  Faking the initial migration will
+  prevent django from trying to double-create the table for `TrustedClient`.  Failing to do so will result in
+  an error of `django.db.utils.OperationalError: (1050, "Table 'oauth2_provider_trustedclient' already exists")`.
 
 Usage
 -----
@@ -32,13 +49,13 @@ different value.
 
 It is possible to customize the OpenID Connect scopes and claims, using the settings `OAUTH_OIDC_ID_TOKEN_HANDLERS`
 and `OAUTH_OIDC_USERINFO_HANDLERS`, which manage the claims associated with the `id_token` during authorization, and
-the results of the `userinfo` endpoint respectively. For more information see `oauth2_provider/oidc/handlers.py`.
+the results of the `userinfo` endpoint respectively. For more information see `edx_oauth2_provider/oidc/handlers.py`.
 
 
 ### Adding new OpenID Connect scopes
 
 Currently, because of a limitation of `django-oauth2-provider`, new scopes have to manually be added to the
-value of `SCOPES` in `oauth2_provider/constants.py`. Future work could address this problem by making the
+value of `SCOPES` in `edx_oauth2_provider/constants.py`. Future work could address this problem by making the
 configuration of new scopes occur dynamically or via registration.
 
 Testing

@@ -13,13 +13,13 @@ import provider.scope
 from provider.oauth2.models import AccessToken
 from provider.oauth2.views import OAuthError, Capture, Redirect  # pylint: disable=unused-import
 
-import oauth2_provider.oidc as oidc
-from oauth2_provider import constants
-from oauth2_provider.forms import PasswordGrantForm
-from oauth2_provider.models import TrustedClient
-from oauth2_provider.backends import PublicPasswordBackend
-from oauth2_provider.forms import (AuthorizationRequestForm, AuthorizationForm,
-                                   RefreshTokenGrantForm, AuthorizationCodeGrantForm)
+from . import oidc
+from . import constants
+from .forms import PasswordGrantForm
+from .models import TrustedClient
+from .backends import PublicPasswordBackend
+from .forms import (AuthorizationRequestForm, AuthorizationForm,
+                    RefreshTokenGrantForm, AuthorizationCodeGrantForm)
 
 
 # pylint: disable=abstract-method

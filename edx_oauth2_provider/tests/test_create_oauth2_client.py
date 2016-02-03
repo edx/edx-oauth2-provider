@@ -10,7 +10,7 @@ from django.utils.six import StringIO
 from nose.tools import assert_raises
 from provider.oauth2.models import Client
 
-from oauth2_provider.models import TrustedClient
+from ..models import TrustedClient
 
 
 User = get_user_model()
