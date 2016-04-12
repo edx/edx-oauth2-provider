@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='edx-oauth2-provider',
-    version='1.0.0',
+    version='1.0.1',
     description='Provide OAuth2 access to edX installations',
     author='edX',
     url='https://github.com/edx/edx-oauth2-provider',
@@ -20,7 +20,7 @@ setup(
     ],
     packages=find_packages(exclude=['tests']),
     install_requires=[
-        'edx-django-oauth2-provider>=0.3.0,<1.0.0',
+        'edx-django-oauth2-provider>=0.3.0,<2.0.0',
         'PyJWT>=1.4.0,<2.0.0'
     ]
 )
