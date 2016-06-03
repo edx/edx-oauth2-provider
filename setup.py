@@ -2,9 +2,11 @@
 
 from setuptools import setup, find_packages
 
+import edx_oauth2_provider
+
 setup(
     name='edx-oauth2-provider',
-    version='1.0.1',
+    version=edx_oauth2_provider.__version__,
     description='Provide OAuth2 access to edX installations',
     author='edX',
     url='https://github.com/edx/edx-oauth2-provider',
