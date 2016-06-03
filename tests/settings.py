@@ -78,7 +78,10 @@ INSTALLED_APPS = (
     'edx_oauth2_provider',
     'provider',
     'provider.oauth2',
+    'django_nose',
 )
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 OAUTH_OIDC_ISSUER = 'https://example.com/oauth2'
 
@@ -86,12 +89,12 @@ OAUTH_OIDC_ID_TOKEN_HANDLERS = (
     'edx_oauth2_provider.oidc.handlers.BasicIDTokenHandler',
     'edx_oauth2_provider.oidc.handlers.ProfileHandler',
     'edx_oauth2_provider.oidc.handlers.EmailHandler',
-    'edx_oauth2_provider.tests.handlers.TestHandler'
+    'edx_oauth2_provider.tests.handlers.DummyHandler'
 )
 
 OAUTH_OIDC_USERINFO_HANDLERS = (
     'edx_oauth2_provider.oidc.handlers.BasicUserInfoHandler',
     'edx_oauth2_provider.oidc.handlers.ProfileHandler',
     'edx_oauth2_provider.oidc.handlers.EmailHandler',
-    'edx_oauth2_provider.tests.handlers.TestHandler'
+    'edx_oauth2_provider.tests.handlers.DummyHandler'
 )

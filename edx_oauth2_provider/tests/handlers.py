@@ -1,4 +1,4 @@
-class TestHandler(object):
+class DummyHandler(object):
     def scope_profile(self, data):
         return ['test']
 
