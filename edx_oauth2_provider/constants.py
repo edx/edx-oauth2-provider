@@ -82,3 +82,5 @@ provider.scope.SCOPE_VALUE_DICT = SCOPE_VALUE_DICT
 
 provider.oauth2.forms.SCOPES = SCOPES
 provider.oauth2.forms.SCOPE_NAMES = SCOPE_NAMES
+
+AUTHORIZED_CLIENTS_SESSION_KEY = getattr(settings, 'OAUTH_OIDC_AUTHORIZED_CLIENTS_SESSION_KEY', 'authorized_clients')

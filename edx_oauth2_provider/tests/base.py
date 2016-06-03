@@ -10,6 +10,7 @@ import jwt
 
 import provider.scope
 
+from ..constants import AUTHORIZED_CLIENTS_SESSION_KEY
 from ..models import TrustedClient
 from .util import normpath
 from .factories import (
@@ -49,14 +50,15 @@ class OAuth2TestCase(BaseTestCase):
     def setUp(self):
         super(OAuth2TestCase, self).setUp()
 
-    def login_and_authorize(self, scope=None, claims=None, trusted=False):
+    def login_and_authorize(self, scope=None, claims=None, trusted=False, validate_session=True):
         """ Login into client using OAuth2 authorization flow. """
 
         self.set_trusted(self.auth_client, trusted)
         self.client.login(username=self.user.username, password=self.password)
 
+        client_id = self.auth_client.client_id
         payload = {
-            'client_id': self.auth_client.client_id,
+            'client_id': client_id,
             'redirect_uri': self.auth_client.redirect_uri,
             'response_type': 'code',
             'state': 'some_state',
@@ -67,6 +69,9 @@ class OAuth2TestCase(BaseTestCase):
         self.assertEqual(302, response.status_code)
 
         response = self.client.get(reverse('oauth2:authorize'), payload)
+
+        if validate_session:
+            self.assertListEqual(self.client.session[AUTHORIZED_CLIENTS_SESSION_KEY], [client_id])
 
         return response
 
