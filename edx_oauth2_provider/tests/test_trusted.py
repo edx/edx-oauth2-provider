@@ -15,7 +15,7 @@ class TrustedClientTest(OAuth2TestCase):
         self.assertEqual(reverse('oauth2:redirect'), normpath(response['Location']))
 
     def test_untrusted_client(self):
-        response = self.login_and_authorize(trusted=False)
+        response = self.login_and_authorize(trusted=False, validate_session=False)
 
         # Check if consent form is being shown
         form_action = 'action="{}"'.format(normpath(reverse("oauth2:authorize")))

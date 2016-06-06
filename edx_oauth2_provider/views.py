@@ -6,20 +6,18 @@ import json
 
 from django.http import HttpResponse
 from django.views.generic import View
-
-import provider.oauth2.views
 import provider.oauth2.forms
-import provider.scope
 from provider.oauth2.models import AccessToken
+import provider.oauth2.views
 from provider.oauth2.views import OAuthError, Capture, Redirect  # pylint: disable=unused-import
+import provider.scope
 
-from . import oidc
-from . import constants
-from .forms import PasswordGrantForm
-from .models import TrustedClient
+from . import constants, oidc
 from .backends import PublicPasswordBackend
-from .forms import (AuthorizationRequestForm, AuthorizationForm,
-                    RefreshTokenGrantForm, AuthorizationCodeGrantForm)
+from .forms import (
+    PasswordGrantForm, AuthorizationRequestForm, AuthorizationForm, RefreshTokenGrantForm, AuthorizationCodeGrantForm
+)
+from .models import TrustedClient
 
 
 # pylint: disable=abstract-method
@@ -41,6 +39,21 @@ class Authorize(provider.oauth2.views.Authorize):
 
         form = AuthorizationForm(data)
         return form
+
+    def handle(self, request, post_data=None):
+        response = super(Authorize, self).handle(request, post_data)
+
+        if response.status_code < 400:
+            # Store the ID of the client being used for authorization. We will use
+            # this later to determine which clients to log out.
+            client_id = request.session.get('oauth:client', {}).get('client_id')
+
+            if client_id:
+                client_ids = set(request.session.get(constants.AUTHORIZED_CLIENTS_SESSION_KEY, []))
+                client_ids.add(client_id)
+                request.session[constants.AUTHORIZED_CLIENTS_SESSION_KEY] = list(client_ids)
+
+        return response
 
 
 # pylint: disable=abstract-method

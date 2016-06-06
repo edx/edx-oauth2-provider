@@ -2,13 +2,12 @@ sudo: false
 language: python
 python:
   - "2.7"
-# command to install dependencies
+
 install:
-    - "pip install coveralls"
-    - "pip install -r requirements.txt"
-    - "pip install -r test_requirements.txt"
-# command to run tests
-script: coverage run ./manage.py test
+    - pip install -U coveralls pip wheel
+    - make requirements
+
+script: make test
 
 after_success: coveralls
 
