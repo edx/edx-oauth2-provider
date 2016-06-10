@@ -9,7 +9,6 @@ from provider.oauth2.models import Client
 
 from ...models import TrustedClient
 
-
 try:
     from django.contrib.auth import get_user_model
 except ImportError:  # Django <1.5
@@ -66,6 +65,13 @@ class Command(BaseCommand):
             default=False,
             help="Designate the Client as trusted. Trusted Clients bypass the user consent "
                  "form typically displayed after validating the user's credentials."
+        ),
+        make_option(
+            '--logout_uri',
+            action='store',
+            type='string',
+            dest='logout_uri',
+            help="Client logout URI. This value will be used for single sign out."
         ),
     )
 
@@ -154,7 +160,7 @@ class Command(BaseCommand):
         Raises:
             CommandError, if a user matching the provided username does not exist.
         """
-        for key in ('username', 'client_name', 'client_id', 'client_secret', 'trusted'):
+        for key in ('username', 'client_name', 'client_id', 'client_secret', 'trusted', 'logout_uri'):
             value = options.get(key)
             if value is not None:
                 self.fields[key] = value
@@ -171,3 +177,11 @@ class Command(BaseCommand):
         client_name = self.fields.pop('client_name', None)
         if client_name is not None:
             self.fields['name'] = client_name
+
+        logout_uri = self.fields.get('logout_uri')
+
+        if logout_uri:
+            try:
+                URLValidator()(logout_uri)
+            except ValidationError:
+                raise CommandError("The logout_uri is invalid.")
