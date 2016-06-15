@@ -1,8 +1,7 @@
 """
 OAuth2 provider customized `django-oauth2-provider` forms.
-
 """
-
+import logging
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
@@ -13,6 +12,8 @@ from provider.oauth2.forms import ScopeChoiceField
 from provider.oauth2.models import Client
 
 from .constants import SCOPE_NAMES
+
+log = logging.getLogger(__name__)
 
 
 # The following forms override the scope field to use the SCOPE_NAMES
@@ -60,9 +61,7 @@ class PasswordGrantForm(provider.oauth2.forms.PasswordGrantForm):
     """
     Forms that validates the user email to be used as secondary user
     identifier during authentication.
-
     """
-
     def clean(self):
         data = self.cleaned_data  # pylint: disable=no-member
         username = data.get('username')
@@ -88,18 +87,21 @@ class PasswordGrantForm(provider.oauth2.forms.PasswordGrantForm):
             # verified_email, we can uncomment the following line.
             # or not user.is_active
         ):
-            raise OAuthValidationError({'error': 'invalid_grant'})
+            error_description = "Username does not exist or invalid credentials given for username '{}'.".format(username)
+            log.error("OAuth2: {}".format(error_description))
+            raise OAuthValidationError({
+                'error': 'invalid_grant',
+                'error_description': error_description
+            })
 
         data['user'] = user
         return data
 
 
-class PublicPasswordGrantForm(PasswordGrantForm,
-                              provider.oauth2.forms.PublicPasswordGrantForm):
+class PublicPasswordGrantForm(PasswordGrantForm, provider.oauth2.forms.PublicPasswordGrantForm):
     """
     Form wrapper to ensure the the customized PasswordGrantForm is used
     during client authentication.
-
     """
     def clean(self):
         data = super(PublicPasswordGrantForm, self).clean()
@@ -107,10 +109,19 @@ class PublicPasswordGrantForm(PasswordGrantForm,
         try:
             client = Client.objects.get(client_id=data.get('client_id'))
         except Client.DoesNotExist:
-            raise OAuthValidationError({'error': 'invalid_client'})
+            error_description = "Client ID '{}' does not exist.".format(data.get('client_id'))
+            log.exception("OAuth2: {}".format(error_description))
+            raise OAuthValidationError({
+                'error': 'invalid_client',
+                'error_description': error_description
+            })
 
         if client.client_type != provider.constants.PUBLIC:
-            raise OAuthValidationError({'error': 'invalid_client'})
-
+            error_description = "'{}' is not a public client.".format(client.client_type)
+            log.error("OAuth2: {}".format(error_description))
+            raise OAuthValidationError({
+                'error': 'invalid_client',
+                'error_description': error_description
+            })
         data['client'] = client
         return data
