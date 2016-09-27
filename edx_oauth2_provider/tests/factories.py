@@ -47,3 +47,9 @@ class AccessTokenFactory(DjangoModelFactory):
     class Meta:
         model = provider.oauth2.models.AccessToken
         django_get_or_create = ('user', 'client')
+
+
+class RefreshTokenFactory(DjangoModelFactory):
+    class Meta:
+        model = provider.oauth2.models.RefreshToken
+        django_get_or_create = ('user', 'client')
