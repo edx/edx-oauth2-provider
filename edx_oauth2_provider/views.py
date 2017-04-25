@@ -35,7 +35,7 @@ class Authorize(provider.oauth2.views.Authorize):
         trusted = TrustedClient.objects.filter(client=client).exists()
         if trusted:
             scope_names = provider.scope.to_names(client_data['scope'])
-            data = {'authorize': [u'Authorize'], 'scope': scope_names}
+            data = {'authorize': ['Authorize'], 'scope': scope_names, 'nonce': client_data.get('nonce', '')}
 
         form = AuthorizationForm(data)
         return form
@@ -101,7 +101,7 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
         return form.cleaned_data
 
     # pylint: disable=super-on-old-class
-    def access_token_response_data(self, access_token):
+    def access_token_response_data(self, access_token, response_type=None, nonce=''):
         """
         Return `access_token` fields for OAuth2, and add `id_token` fields for
         OpenID Connect according to the `access_token` scope.
@@ -121,7 +121,7 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
         # requested, as required by OpenID Connect specification.
 
         if provider.scope.check(constants.OPEN_ID_SCOPE, access_token.scope):
-            id_token = self.get_id_token(access_token)
+            id_token = self.get_id_token(access_token, nonce)
             extra_data['id_token'] = self.encode_id_token(id_token)
             scope = provider.scope.to_int(*id_token.scopes)
 
@@ -138,14 +138,11 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
 
         return response_data
 
-    def get_id_token(self, access_token):
+    def get_id_token(self, access_token, nonce):
         """ Return an ID token for the given Access Token. """
 
         claims_string = self.request.POST.get('claims')
         claims_request = json.loads(claims_string) if claims_string else {}
-
-        # Use a nonce to prevent replay attacks.
-        nonce = self.request.POST.get('nonce')
 
         return oidc.id_token(access_token, nonce, claims_request)
 

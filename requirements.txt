@@ -1,6 +1,6 @@
 -e .
-coverage==4.1
-ddt==1.1.0
-django-nose==1.4.3
-factory_boy==2.7.0
+coverage==4.3.4
+ddt==1.1.1
+django-nose==1.4.4
+factory_boy==2.8.1
 mock==2.0.0

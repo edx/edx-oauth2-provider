@@ -1,5 +1,5 @@
 requirements:
-	pip install -r requirements.txt
+	pip install --process-dependency-links -r requirements.txt
 
 test:
 	coverage run ./manage.py test

@@ -1,5 +1,6 @@
 # pylint: disable=missing-docstring
 import json
+import uuid
 from urlparse import urlparse
 
 from django.core.urlresolvers import reverse
@@ -23,6 +24,8 @@ from .factories import (
 
 class BaseTestCase(TestCase):
     def setUp(self):
+        super(BaseTestCase, self).setUp()
+
         self.client_secret = 'some_secret'
         self.auth_client = ClientFactory(client_secret=self.client_secret)
 
@@ -49,6 +52,7 @@ class BaseTestCase(TestCase):
 class OAuth2TestCase(BaseTestCase):
     def setUp(self):
         super(OAuth2TestCase, self).setUp()
+        self.nonce = str(uuid.uuid4())
 
     def login_and_authorize(self, scope=None, claims=None, trusted=False, validate_session=True):
         """ Login into client using OAuth2 authorization flow. """
@@ -62,6 +66,7 @@ class OAuth2TestCase(BaseTestCase):
             'redirect_uri': self.auth_client.redirect_uri,
             'response_type': 'code',
             'state': 'some_state',
+            'nonce': self.nonce,
         }
         _add_values(payload, 'id_token', scope, claims)
 

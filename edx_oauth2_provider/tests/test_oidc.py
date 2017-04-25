@@ -1,21 +1,19 @@
 # pylint: disable=missing-docstring
+import json
 
 import datetime
-import json
-import uuid
-
+import jwt
+import mock
 from django.conf import settings
 from django.test.utils import override_settings
 
-import jwt
-import mock
-
+from provider.oauth2.models import Grant
 from provider.scope import check
-from .. import oidc
-from .. import constants
-from ..oidc.core import IDToken
 from .base import OAuth2TestCase
 from .factories import AccessTokenFactory
+from .. import constants
+from .. import oidc
+from ..oidc.core import IDToken
 
 BASE_DATETIME = datetime.datetime(1970, 1, 1)
 
@@ -25,7 +23,6 @@ BASE_DATETIME = datetime.datetime(1970, 1, 1)
 class BaseTestCase(OAuth2TestCase):
     def setUp(self):
         super(BaseTestCase, self).setUp()
-        self.nonce = unicode(uuid.uuid4())
         self.access_token = AccessTokenFactory(user=self.user, client=self.auth_client)
 
 
@@ -102,6 +99,18 @@ class IdTokenTest(BaseTestCase):
         expected = self._get_expected_claims(self.access_token, self.nonce)
         self.assertEqual(claims, expected)
 
+    def test_id_token_nonce(self):
+        """ The nonce in the ID token should be the same nonce passed to the initial authorization call. """
+        response = self.get_access_token_response(scope='openid')
+
+        # Validate Grant has an associated nonce
+        self.assertEqual(Grant.objects.filter(client=self.auth_client, user=self.user, nonce=self.nonce).count(), 1)
+
+        # Validate ID token nonce
+        response = json.loads(response.content)
+        id_token = jwt.decode(response['id_token'], verify=False)
+        self.assertEqual(id_token['nonce'], self.nonce)
+
 
 class UserInfoTest(BaseTestCase):
     def assertIncludedClaims(self, claims, expected_scope=None, expected_claims=None):
@@ -146,6 +155,7 @@ class UserInfoTest(BaseTestCase):
 
     def test_arguments(self):
         """ Test if the responses contain the requested claims according to permissions"""
+
         # TODO: replace with DDT test
 
         def userinfo_req(req):
