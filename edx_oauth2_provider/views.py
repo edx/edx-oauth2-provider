@@ -6,11 +6,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 
+from django.http import HttpResponse
+from django.views.generic import View
 import provider.oauth2.forms
 import provider.oauth2.views
 import provider.scope
-from django.http import HttpResponse
-from django.views.generic import View
 from provider.oauth2.models import AccessToken
 from provider.oauth2.views import Capture, OAuthError, Redirect  # pylint: disable=unused-import
 
