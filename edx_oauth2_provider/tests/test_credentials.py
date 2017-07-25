@@ -3,9 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 
-from django.core.urlresolvers import reverse
-
 import ddt
+from django.core.urlresolvers import reverse
 from provider.constants import CONFIDENTIAL, PUBLIC
 
 from .base import OAuth2TestCase

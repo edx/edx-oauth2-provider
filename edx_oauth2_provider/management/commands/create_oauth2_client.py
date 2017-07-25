@@ -2,6 +2,7 @@
 Management command used to create an OAuth2 client in the database.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import json
 
 from django.contrib.auth import get_user_model

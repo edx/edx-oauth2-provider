@@ -11,7 +11,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import provider.scope
 
-
 REQUIRED_SCOPES = ['openid']
 
 CLAIM_REQUEST_FIELDS = ['value', 'values', 'essential']

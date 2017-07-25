@@ -2,12 +2,13 @@
 OAuth2 provider customized `django-oauth2-provider` forms.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
+
+import provider.constants
+import provider.oauth2.forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-
-import provider.oauth2.forms
-import provider.constants
 from provider.forms import OAuthValidationError
 from provider.oauth2.forms import ScopeChoiceField
 from provider.oauth2.models import Client

@@ -3,20 +3,25 @@ Customized django-oauth2-provider views, aligned with the OpenID specification.
 
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import json
 
+import provider.oauth2.forms
+import provider.oauth2.views
+import provider.scope
 from django.http import HttpResponse
 from django.views.generic import View
-import provider.oauth2.forms
 from provider.oauth2.models import AccessToken
-import provider.oauth2.views
-from provider.oauth2.views import OAuthError, Capture, Redirect  # pylint: disable=unused-import
-import provider.scope
+from provider.oauth2.views import Capture, OAuthError, Redirect  # pylint: disable=unused-import
 
 from . import constants, oidc
 from .backends import PublicPasswordBackend
 from .forms import (
-    PasswordGrantForm, AuthorizationRequestForm, AuthorizationForm, RefreshTokenGrantForm, AuthorizationCodeGrantForm
+    AuthorizationCodeGrantForm,
+    AuthorizationForm,
+    AuthorizationRequestForm,
+    PasswordGrantForm,
+    RefreshTokenGrantForm
 )
 from .models import TrustedClient
 

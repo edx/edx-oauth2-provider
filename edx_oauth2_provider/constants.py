@@ -4,11 +4,10 @@ OAuth2 and OpenID Connect settings
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.conf import settings
-
 import provider.constants
-import provider.scope
 import provider.oauth2.forms
+import provider.scope
+from django.conf import settings
 
 # REQUIRED Issuer Identifider (the `iss` field in the `id_token`)
 OAUTH_OIDC_ISSUER = settings.OAUTH_OIDC_ISSUER

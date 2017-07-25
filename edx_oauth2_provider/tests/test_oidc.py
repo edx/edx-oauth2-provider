@@ -1,20 +1,20 @@
 # pylint: disable=missing-docstring
 from __future__ import absolute_import, division, print_function, unicode_literals
-import json
 
 import datetime
+import json
+
 import jwt
 import mock
 from django.conf import settings
 from django.test.utils import override_settings
-
 from provider.oauth2.models import Grant
 from provider.scope import check
+
+from .. import constants, oidc
+from ..oidc.core import IDToken
 from .base import OAuth2TestCase
 from .factories import AccessTokenFactory
-from .. import constants
-from .. import oidc
-from ..oidc.core import IDToken
 
 BASE_DATETIME = datetime.datetime(1970, 1, 1)
 

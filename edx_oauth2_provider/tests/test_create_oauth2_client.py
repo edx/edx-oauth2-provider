@@ -2,19 +2,19 @@
 Tests of the create_oauth2_client management command.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
-from itertools import product
+
 import json
+from itertools import product
 
 import ddt
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils.six import StringIO
 from provider.oauth2.models import Client
 
 from ..models import TrustedClient
-
 
 URL = 'https://www.example.com/'
 REDIRECT_URI = 'https://www.example.com/complete/edx-oidc/'

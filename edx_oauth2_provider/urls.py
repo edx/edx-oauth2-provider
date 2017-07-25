@@ -8,8 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from provider.oauth2.views import AccessTokenDetailView
 
-from .views import Authorize, Redirect, Capture, AccessTokenView, UserInfoView
-
+from .views import AccessTokenView, Authorize, Capture, Redirect, UserInfoView
 
 urlpatterns = [
     url(r'^authorize/?$', login_required(Capture.as_view()), name='capture'),

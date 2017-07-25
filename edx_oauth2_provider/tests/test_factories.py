@@ -1,14 +1,9 @@
 # pylint: disable=missing-docstring
 
 from django.test import TestCase
-from provider.oauth2.models import Client, AccessToken, RefreshToken
+from provider.oauth2.models import AccessToken, Client, RefreshToken
 
-from .factories import (
-    UserFactory,
-    ClientFactory,
-    AccessTokenFactory,
-    RefreshTokenFactory
-)
+from .factories import AccessTokenFactory, ClientFactory, RefreshTokenFactory, UserFactory
 
 
 class TestFactory(TestCase):

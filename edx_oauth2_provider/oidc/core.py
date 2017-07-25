@@ -8,13 +8,11 @@ endpoints according to the OpenID Connect specification.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import jwt
-
-from django.utils.module_loading import import_string
 import provider.scope
+from django.utils.module_loading import import_string
 
 from .. import constants
 from .collect import collect
-
 
 HANDLERS = {
     'id_token': [import_string(cls) for cls in constants.ID_TOKEN_HANDLERS],

@@ -1,26 +1,20 @@
 # pylint: disable=missing-docstring
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import json
 import uuid
 from urlparse import urlparse
 
+import jwt
+import provider.scope
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import TestCase
 
-import jwt
-
-import provider.scope
-
 from ..constants import AUTHORIZED_CLIENTS_SESSION_KEY
 from ..models import TrustedClient
+from .factories import AccessTokenFactory, ClientFactory, TrustedClientFactory, UserFactory
 from .util import normpath
-from .factories import (
-    UserFactory,
-    ClientFactory,
-    AccessTokenFactory,
-    TrustedClientFactory
-)
 
 
 class BaseTestCase(TestCase):

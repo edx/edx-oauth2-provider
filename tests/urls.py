@@ -3,9 +3,9 @@ URLs for testing.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.conf.urls import url, include
-from django.contrib import admin
 import django.contrib.auth.views
+from django.conf.urls import include, url
+from django.contrib import admin
 
 admin.autodiscover()
 

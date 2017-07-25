@@ -1,11 +1,10 @@
 # pylint: disable=missing-docstring
 from __future__ import absolute_import, division, print_function, unicode_literals
-from django.contrib.auth.models import User
 
 import factory
-from factory.django import DjangoModelFactory
-
 import provider.oauth2.models
+from django.contrib.auth.models import User
+from factory.django import DjangoModelFactory
 from provider.constants import CONFIDENTIAL
 
 from .. import models
