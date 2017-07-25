@@ -8,10 +8,10 @@ endpoints according to the OpenID Connect specification.
 
 import jwt
 
+from django.utils.module_loading import import_string
 import provider.scope
 
 from .. import constants
-from ..utils import import_string
 from .collect import collect
 
 

@@ -1,6 +1,6 @@
 import json
-from optparse import make_option
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.core.validators import URLValidator
@@ -9,74 +9,66 @@ from provider.oauth2.models import Client
 
 from ...models import TrustedClient
 
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:  # Django <1.5
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
+User = get_user_model()
 
 ARG_STRING = '<url> <redirect_uri> <client_type: "confidential" | "public">'
 
 
 class Command(BaseCommand):
     help = 'Create a new OAuth2 Client. Outputs a serialized representation of the newly-created Client.'
-    args = ARG_STRING
-    fields = None
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
+
+        # Required positional arguments.
+        parser.add_argument(
+            'url',
+            help="Url."
+        )
+        parser.add_argument(
+            'redirect_uri',
+            help="Redirect URI."
+        )
+        parser.add_argument(
+            'client_type',
+            help="Client type."
+        )
+
+        # Optional options.
+        parser.add_argument(
             '-u',
             '--username',
-            action='store',
-            type='string',
-            dest='username',
             help="Username of a user to associate with the Client."
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '-n',
             '--client_name',
-            action='store',
-            type='string',
-            dest='client_name',
             help="String to assign as the Client name."
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '-i',
             '--client_id',
-            action='store',
-            type='string',
-            dest='client_id',
             help="String to assign as the Client ID."
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '-s',
             '--client_secret',
-            action='store',
-            type='string',
-            dest='client_secret',
             help="String to assign as the Client secret. Should not be shared."
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '-t',
             '--trusted',
             action='store_true',
-            dest='trusted',
-            default=False,
             help="Designate the Client as trusted. Trusted Clients bypass the user consent "
                  "form typically displayed after validating the user's credentials."
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--logout_uri',
-            action='store',
-            type='string',
-            dest='logout_uri',
             help="Client logout URI. This value will be used for single sign out."
-        ),
-    )
+        )
 
     def handle(self, *args, **options):
-        self._clean_args(args)
+        self._clean_required_args(options['url'], options['redirect_uri'], options['client_type'])
         self._parse_options(options)
 
         client_id = self.fields.get('client_id')
@@ -105,29 +97,20 @@ class Command(BaseCommand):
         serialized = json.dumps(client.serialize(), indent=4)
         self.stdout.write(serialized)
 
-    def _clean_args(self, args):
-        """Validate and clean the command's arguments.
-
-        These arguments must include the Client application's URL, the Client application's
-        OAuth2 callback URL, and the Client's type, indicating whether the Client application
-        is capable of maintaining the confidentiality of its credentials (e.g., running on a
-        secure server) or is incapable of doing so (e.g., running in a browser).
+    def _clean_required_args(self, url, redirect_uri, client_type):
+        """
+        Validate and clean the command's arguments.
 
         Arguments:
-            args (tuple): Arguments with which the command was called.
+            url (str): Client's application URL.
+            redirect_uri (str): Client application's OAuth2 callback URI.
+            client_type (str): Client's type, indicating whether the Client application
+                is capable of maintaining the confidentiality of its credentials (e.g., running on a
+                secure server) or is incapable of doing so (e.g., running in a browser).
 
         Raises:
-            CommandError, if the number of arguments provided is invalid, if the URLs provided
-                are invalid, or if the client type provided is invalid.
+            CommandError, if the URLs provided are invalid, or if the client type provided is invalid.
         """
-        if len(args) != 3:
-            raise CommandError(
-                "Number of arguments provided is invalid. "
-                "This command requires the following arguments: {}.".format(ARG_STRING)
-            )
-
-        url, redirect_uri, client_type = args
-
         # Validate URLs
         for u in (url, redirect_uri):
             try:

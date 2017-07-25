@@ -30,6 +30,15 @@ tramp
 *.swp
 *.swo
 
+# Unit test / coverage reports
+.cache/
+.coverage
+.coverage.*
+.tox
+coverage.xml
+htmlcov/
+coverage/
+
 # Mac
 .DS_Store
 ._*
@@ -41,10 +50,8 @@ Desktop.ini
 .idea/
 analytics_dashboard/assets/
 node_modules/
-.coverage
 nosetests.xml
 reports/
-coverage/
 
 acceptance_tests/*.png
 

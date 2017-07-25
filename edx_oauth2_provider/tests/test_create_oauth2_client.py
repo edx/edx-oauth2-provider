@@ -7,7 +7,6 @@ from django.core.management.base import CommandError
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils.six import StringIO
-from nose.tools import assert_raises
 from provider.oauth2.models import Client
 
 from ..models import TrustedClient
@@ -90,15 +89,16 @@ class CreateOauth2ClientTests(TestCase):
         self.assert_client_created(args, options)
 
     @ddt.data(
-        (URL, REDIRECT_URI),
-        (URL, REDIRECT_URI, CLIENT_TYPES[0], CLIENT_TYPES[1]),
+        ((URL, REDIRECT_URI), 'too few arguments'),
+        ((URL, REDIRECT_URI, CLIENT_TYPES[0], CLIENT_TYPES[1]), 'unrecognized arguments'),
     )
-    def test_argument_cardinality(self, args):
+    @ddt.unpack
+    def test_argument_cardinality(self, args, err_msg):
         """Verify that the command fails when given an incorrect number of arguments."""
-        with assert_raises(CommandError) as e:
+        with self.assertRaises(CommandError) as e:
             self._call_command(args, {})
 
-        self.assertIn('Number of arguments provided is invalid.', e.exception.message)
+        self.assertIn(err_msg, e.exception.message)
 
     @ddt.data(
         ('invalid', REDIRECT_URI, CLIENT_TYPES[0]),
@@ -106,21 +106,21 @@ class CreateOauth2ClientTests(TestCase):
     )
     def test_url_validation(self, args):
         """Verify that the command fails when the provided URLs are invalid."""
-        with assert_raises(CommandError) as e:
+        with self.assertRaises(CommandError) as e:
             self._call_command(args)
 
         self.assertIn('URLs provided are invalid.', e.exception.message)
 
     def test_client_type_validation(self):
         """Verify that the command fails when the provided client type is invalid."""
-        with assert_raises(CommandError) as e:
+        with self.assertRaises(CommandError) as e:
             self._call_command((self.URL, self.REDIRECT_URI, 'not_a_client_type'))
 
         self.assertIn('Client type provided is invalid.', e.exception.message)
 
     def test_username_mismatch(self):
         """Verify that the command fails when the provided username is invalid."""
-        with assert_raises(CommandError) as e:
+        with self.assertRaises(CommandError) as e:
             self._call_command(
                 (self.URL, self.REDIRECT_URI, self.CLIENT_TYPES[0]),
                 options={'username': 'bad_username'}
