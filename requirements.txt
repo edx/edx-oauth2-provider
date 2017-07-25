@@ -3,7 +3,7 @@ coverage==4.3.4
 ddt==1.1.1
 factory_boy==2.8.1
 mock==2.0.0
-packaging==16.7
+packaging>=16.8
 pytest-catchlog==1.2.2
 pytest-cov==2.3.1
 pytest-django==3.0.0
