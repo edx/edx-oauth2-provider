@@ -26,6 +26,7 @@ quality: ## check coding style with pycodestyle and pylint
 
 requirements:
 	pip install --process-dependency-links -r requirements.txt
+	pip install --process-dependency-links -r test_requirements.txt
 
 test: clean ## run tests in the current virtualenv
 	coverage py.test
