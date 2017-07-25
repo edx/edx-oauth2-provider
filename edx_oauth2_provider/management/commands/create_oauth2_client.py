@@ -1,3 +1,7 @@
+"""
+Management command used to create an OAuth2 client in the database.
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 import json
 
 from django.contrib.auth import get_user_model
@@ -9,12 +13,11 @@ from provider.oauth2.models import Client
 
 from ...models import TrustedClient
 
-User = get_user_model()
-
 ARG_STRING = '<url> <redirect_uri> <client_type: "confidential" | "public">'
 
 
 class Command(BaseCommand):
+    """create_oauth2_client command class"""
     help = 'Create a new OAuth2 Client. Outputs a serialized representation of the newly-created Client.'
 
     def add_arguments(self, parser):
@@ -112,9 +115,9 @@ class Command(BaseCommand):
             CommandError, if the URLs provided are invalid, or if the client type provided is invalid.
         """
         # Validate URLs
-        for u in (url, redirect_uri):
+        for url_to_validate in (url, redirect_uri):
             try:
-                URLValidator()(u)
+                URLValidator()(url_to_validate)
             except ValidationError:
                 raise CommandError("URLs provided are invalid. Please provide valid application and redirect URLs.")
 
@@ -128,7 +131,7 @@ class Command(BaseCommand):
         if client_type is None:
             raise CommandError("Client type provided is invalid. Please use one of 'confidential' or 'public'.")
 
-        self.fields = {
+        self.fields = {  # pylint: disable=attribute-defined-outside-init
             'url': url,
             'redirect_uri': redirect_uri,
             'client_type': client_type,
@@ -151,8 +154,9 @@ class Command(BaseCommand):
         username = self.fields.pop('username', None)
         if username is not None:
             try:
-                self.fields['user'] = User.objects.get(username=username)
-            except User.DoesNotExist:
+                user_model = get_user_model()
+                self.fields['user'] = user_model.objects.get(username=username)
+            except user_model.DoesNotExist:
                 raise CommandError("User matching the provided username does not exist.")
 
         # The keyword argument 'name' conflicts with that of `call_command()`. We instead

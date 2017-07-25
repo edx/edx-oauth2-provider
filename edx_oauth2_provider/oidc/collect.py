@@ -7,6 +7,7 @@ For details on the format of the claim handlers, see
 None: The functions in this module assume the `openid` scope is implied.
 
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import provider.scope
 
@@ -88,6 +89,7 @@ def _collect_scopes(handlers, scopes, user, client):
     data = {'user': user, 'client': client}
 
     def visitor(scope_name, func):
+        """Visitor method."""
         claim_names = func(data)
         # If the claim_names is None, it means that the scope is not authorized.
         if claim_names is not None:
@@ -106,6 +108,7 @@ def _collect_names(handlers, scopes, user, client):
     data = {'user': user, 'client': client}
 
     def visitor(_scope_name, func):
+        """Visitor method."""
         claim_names = func(data)
         # If the claim_names is None, it means that the scope is not authorized.
         if claim_names is not None:
@@ -122,6 +125,7 @@ def _collect_values(handlers, names, user, client, values):
     results = {}
 
     def visitor(claim_name, func):
+        """Visitor method."""
         data = {'user': user, 'client': client}
         data.update(values.get(claim_name) or {})
         claim_value = func(data)

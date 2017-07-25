@@ -1,3 +1,7 @@
+"""
+Tests of the create_oauth2_client management command.
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 from itertools import product
 import json
 
@@ -12,18 +16,21 @@ from provider.oauth2.models import Client
 from ..models import TrustedClient
 
 
-User = get_user_model()
+URL = 'https://www.example.com/'
+REDIRECT_URI = 'https://www.example.com/complete/edx-oidc/'
+CLIENT_TYPES = ('confidential', 'public')
+USERNAME = 'username'
 
 
 @ddt.ddt
 class CreateOauth2ClientTests(TestCase):
-    URL = 'https://www.example.com/'
-    REDIRECT_URI = 'https://www.example.com/complete/edx-oidc/'
-    CLIENT_TYPES = ('confidential', 'public')
-    USERNAME = 'username'
-
+    """
+    Mgmt cmd test class.
+    """
     def setUp(self):
-        self.user = User.objects.create(username=self.USERNAME)
+        super(CreateOauth2ClientTests, self).setUp()
+        user_model = get_user_model()
+        self.user = user_model.objects.create(username=USERNAME)
 
     def _call_command(self, args, options=None):
         """Call the command, capturing its output."""
@@ -95,10 +102,10 @@ class CreateOauth2ClientTests(TestCase):
     @ddt.unpack
     def test_argument_cardinality(self, args, err_msg):
         """Verify that the command fails when given an incorrect number of arguments."""
-        with self.assertRaises(CommandError) as e:
+        with self.assertRaises(CommandError) as exc:
             self._call_command(args, {})
 
-        self.assertIn(err_msg, e.exception.message)
+        self.assertIn(err_msg, exc.exception.message)
 
     @ddt.data(
         ('invalid', REDIRECT_URI, CLIENT_TYPES[0]),
@@ -106,31 +113,31 @@ class CreateOauth2ClientTests(TestCase):
     )
     def test_url_validation(self, args):
         """Verify that the command fails when the provided URLs are invalid."""
-        with self.assertRaises(CommandError) as e:
+        with self.assertRaises(CommandError) as exc:
             self._call_command(args)
 
-        self.assertIn('URLs provided are invalid.', e.exception.message)
+        self.assertIn('URLs provided are invalid.', exc.exception.message)
 
     def test_client_type_validation(self):
         """Verify that the command fails when the provided client type is invalid."""
-        with self.assertRaises(CommandError) as e:
-            self._call_command((self.URL, self.REDIRECT_URI, 'not_a_client_type'))
+        with self.assertRaises(CommandError) as exc:
+            self._call_command((URL, REDIRECT_URI, 'not_a_client_type'))
 
-        self.assertIn('Client type provided is invalid.', e.exception.message)
+        self.assertIn('Client type provided is invalid.', exc.exception.message)
 
     def test_username_mismatch(self):
         """Verify that the command fails when the provided username is invalid."""
-        with self.assertRaises(CommandError) as e:
+        with self.assertRaises(CommandError) as exc:
             self._call_command(
-                (self.URL, self.REDIRECT_URI, self.CLIENT_TYPES[0]),
+                (URL, REDIRECT_URI, CLIENT_TYPES[0]),
                 options={'username': 'bad_username'}
             )
 
-        self.assertIn('User matching the provided username does not exist.', e.exception.message)
+        self.assertIn('User matching the provided username does not exist.', exc.exception.message)
 
     def test_idempotency(self):
         """Verify that the command can be run repeatedly with the same client ID, without any ill effects."""
-        args = [self.URL, self.REDIRECT_URI, self.CLIENT_TYPES[0]]
+        args = [URL, REDIRECT_URI, CLIENT_TYPES[0]]
         options = {
             'username': None,
             'client_name': 'name',

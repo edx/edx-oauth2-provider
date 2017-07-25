@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring
+from __future__ import absolute_import, division, print_function, unicode_literals
 from django.contrib.auth.models import User
 
 import factory
@@ -10,7 +12,7 @@ from .. import models
 
 
 class UserFactory(DjangoModelFactory):
-    class Meta:
+    class Meta(object):
         model = User
         django_get_or_create = ('username', )
 
@@ -27,7 +29,7 @@ class UserFactory(DjangoModelFactory):
 
 
 class ClientFactory(DjangoModelFactory):
-    class Meta:
+    class Meta(object):
         model = provider.oauth2.models.Client
 
     client_id = factory.Sequence(u'client_{0}'.format)
@@ -39,17 +41,17 @@ class ClientFactory(DjangoModelFactory):
 
 
 class TrustedClientFactory(DjangoModelFactory):
-    class Meta:
+    class Meta(object):
         model = models.TrustedClient
 
 
 class AccessTokenFactory(DjangoModelFactory):
-    class Meta:
+    class Meta(object):
         model = provider.oauth2.models.AccessToken
         django_get_or_create = ('user', 'client')
 
 
 class RefreshTokenFactory(DjangoModelFactory):
-    class Meta:
+    class Meta(object):
         model = provider.oauth2.models.RefreshToken
         django_get_or_create = ('user', 'client')

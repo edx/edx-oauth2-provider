@@ -2,6 +2,7 @@
 OAuth2 provider `django-oauth2-provider` authentication backends
 
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .forms import PublicPasswordGrantForm
 

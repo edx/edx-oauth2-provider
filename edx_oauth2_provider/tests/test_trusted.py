@@ -1,4 +1,7 @@
-# pylint: disable=missing-docstring
+"""
+Trusted client tests.
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.core.urlresolvers import reverse
 
@@ -7,6 +10,9 @@ from .util import normpath
 
 
 class TrustedClientTest(OAuth2TestCase):
+    """
+    Trusted client test class.
+    """
     def test_trusted_client(self):
         response = self.login_and_authorize(trusted=True)
 

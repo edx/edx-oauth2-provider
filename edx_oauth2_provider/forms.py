@@ -1,6 +1,7 @@
 """
 OAuth2 provider customized `django-oauth2-provider` forms.
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -79,15 +80,15 @@ class PasswordGrantForm(provider.oauth2.forms.PasswordGrantForm):
             except User.DoesNotExist:
                 user = None
 
-        if (
-            user is None
+        if user is None:
             # TODO This is a temporary workaround while the is_active field on the
             # user is coupled with whether or not the user has verified ownership
             # of their claimed email address.  Once is_active is decoupled from
-            # verified_email, we can uncomment the following line.
+            # verified_email, add the following condition to the 'if' statement above.
             # or not user.is_active
-        ):
-            error_description = "Username does not exist or invalid credentials given for username '{}'.".format(username)
+            error_description = "Username does not exist or invalid credentials given for username '{}'.".format(
+                username
+            )
             log.error("OAuth2: {}".format(error_description))
             raise OAuthValidationError({
                 'error': 'invalid_grant',

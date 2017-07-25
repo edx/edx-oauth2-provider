@@ -1,0 +1,6 @@
+caniusepython3==4.0.0
+edx-lint==0.5.1
+isort==4.2.5
+pycodestyle==2.0.0
+pylint-django==0.7.2
+pylint==1.5.4

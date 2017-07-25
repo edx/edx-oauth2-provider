@@ -59,6 +59,7 @@ scopes whose names are not valid python method names.
 """
 
 # pylint: disable=unused-argument
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from calendar import timegm
 from datetime import datetime, timedelta

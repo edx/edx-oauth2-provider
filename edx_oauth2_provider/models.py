@@ -1,10 +1,10 @@
 """
 Custom OAuth2 models
-
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import models
-
+from django.utils.encoding import python_2_unicode_compatible
 from provider.oauth2.models import Client
 
 # Import constants to force override of `provider.scope`
@@ -12,6 +12,7 @@ from provider.oauth2.models import Client
 from . import constants  # pylint: disable=unused-import
 
 
+@python_2_unicode_compatible
 class TrustedClient(models.Model):
     """
     By default `django-oauth2-provider` shows a consent form to the
@@ -24,3 +25,6 @@ class TrustedClient(models.Model):
 
     class Meta(object):
         db_table = 'oauth2_provider_trustedclient'
+
+    def __str__(self):
+        return "%s" % self.client

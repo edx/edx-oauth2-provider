@@ -1,4 +1,5 @@
 """ Test email as username authentication """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
 
@@ -63,6 +64,9 @@ AUTHENTICATION_TEST_DATA = [
 
 @ddt.ddt
 class AuthenticationTest(OAuth2TestCase):
+    """
+    Authentication test class.
+    """
     def setUp(self):
         super(AuthenticationTest, self).setUp()
         user = self.user_factory.create(

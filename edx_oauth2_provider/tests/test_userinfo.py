@@ -1,8 +1,14 @@
-# pylint: disable=missing-docstring
+"""
+Userinfo tests.
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 from .base import UserInfoTestCase
 
 
 class UserInfoViewTest(UserInfoTestCase):
+    """
+    User info view tests.
+    """
     def test_authorized(self):
         token = self.access_token.token
         self.set_access_token_scope('openid')

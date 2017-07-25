@@ -1,6 +1,7 @@
 """
 Django settings for example project.
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
 DEBUG = True

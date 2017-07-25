@@ -12,8 +12,6 @@ from .factories import (
 
 
 class TestFactory(TestCase):
-    def setUp(self):
-        super(TestFactory, self).setUp()
 
     def test_client_factory(self):
         user = UserFactory()

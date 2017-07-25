@@ -2,6 +2,7 @@
 Customized django-oauth2-provider views, aligned with the OpenID specification.
 
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 import json
 
 from django.http import HttpResponse

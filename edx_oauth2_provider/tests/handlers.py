@@ -1,5 +1,9 @@
+# pylint: disable=missing-docstring
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+
 class DummyHandler(object):
-    def scope_profile(self, data):
+    def scope_profile(self, data):  # pylint: disable=unused-argument
         return ['test']
 
     def claim_test(self, data):
@@ -15,8 +19,5 @@ class DummyHandler(object):
             values = range(10)
             if data.get('values'):
                 values = list(set(values) & set(data.get('values')))
-                return values
-            else:
-                return values
-        else:
-            return None
+            return values
+        return None
