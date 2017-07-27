@@ -18,7 +18,9 @@ ARG_STRING = '<url> <redirect_uri> <client_type: "confidential" | "public">'
 
 
 class Command(BaseCommand):
-    """create_oauth2_client command class"""
+    """
+    create_oauth2_client command class
+    """
     help = 'Create a new OAuth2 Client. Outputs a serialized representation of the newly-created Client.'
 
     def add_arguments(self, parser):

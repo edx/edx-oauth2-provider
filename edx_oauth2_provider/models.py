@@ -27,4 +27,4 @@ class TrustedClient(models.Model):
         db_table = 'oauth2_provider_trustedclient'
 
     def __str__(self):
-        return "%s" % self.client
+        return "{}".format(self.client)

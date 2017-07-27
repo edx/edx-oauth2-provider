@@ -5,8 +5,8 @@ For details on the format of the claim handlers, see
 :mod:`oauth2_provider.oicd.handlers`
 
 None: The functions in this module assume the `openid` scope is implied.
-
 """
+# pylint: disable=missing-docstring
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import provider.scope
@@ -88,7 +88,6 @@ def _collect_scopes(handlers, scopes, user, client):
     data = {'user': user, 'client': client}
 
     def visitor(scope_name, func):
-        """Visitor method."""
         claim_names = func(data)
         # If the claim_names is None, it means that the scope is not authorized.
         if claim_names is not None:
@@ -107,7 +106,6 @@ def _collect_names(handlers, scopes, user, client):
     data = {'user': user, 'client': client}
 
     def visitor(_scope_name, func):
-        """Visitor method."""
         claim_names = func(data)
         # If the claim_names is None, it means that the scope is not authorized.
         if claim_names is not None:
@@ -124,7 +122,6 @@ def _collect_values(handlers, names, user, client, values):
     results = {}
 
     def visitor(claim_name, func):
-        """Visitor method."""
         data = {'user': user, 'client': client}
         data.update(values.get(claim_name) or {})
         claim_value = func(data)
@@ -180,13 +177,13 @@ def _validate_claim_values(name, value, ignore_errors):
     return results
 
 
-def _visit_handlers(handlers, visitor, preffix, suffixes):
+def _visit_handlers(handlers, visitor, prefix, suffixes):
     """ Use visitor partern to collect information from handlers """
 
     results = []
     for handler in handlers:
         for suffix in suffixes:
-            func = getattr(handler, '{}_{}'.format(preffix, suffix).lower(), None)
+            func = getattr(handler, '{}_{}'.format(prefix, suffix).lower(), None)
             if func:
                 results.append(visitor(suffix, func))
 
