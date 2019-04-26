@@ -19,6 +19,8 @@ matrix:
       env: TOXENV=py36-django21
     - python: 2.7
       env: TOXENV=quality
+  allow_failures:
+    - python: 3.6
 
 cache:
   - pip
