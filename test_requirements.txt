@@ -1,5 +1,5 @@
-caniusepython3==4.0.0
-coverage==4.3.4
+caniusepython3==7.1.0
+coverage>=4.4
 ddt==1.1.1
 edx-lint==0.5.1
 factory_boy==2.8.1
@@ -10,7 +10,8 @@ pycodestyle==2.0.0
 pylint-django==0.7.2
 pylint==1.5.4
 pytest-catchlog==1.2.2
-pytest-cov==2.3.1
-pytest-django==3.0.0
+pytest-cov==2.7.1
+pytest-django==3.4.6
 tox-battery==0.2
-tox==2.3.1
+tox==3.9.0
+setuptools>=30.0.0

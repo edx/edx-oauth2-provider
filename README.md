@@ -50,7 +50,10 @@ iframe when the user logs out.
 Testing
 -------
 
-        $ ./manage.py test
+* create a virtual environment
+* make requirements
+* make test  # currently succeeds with warnings on python 2.7
+* make test-all  # run tox tests, currently fails
 
 
 How to Contribute

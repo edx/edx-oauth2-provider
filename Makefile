@@ -25,12 +25,11 @@ quality: ## check coding style with pycodestyle and pylint
 	tox -e quality
 
 requirements:
-	pip install --process-dependency-links -r requirements.txt
-	pip install --process-dependency-links -r test_requirements.txt
+	pip install  -r requirements.txt
+	pip install  -r test_requirements.txt
 
 test: clean ## run tests in the current virtualenv
-	coverage py.test
-	coverage report
+	py.test
 
 diff_cover: test
 	diff-cover coverage.xml
