@@ -6,9 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
-from django.core.validators import URLValidator
 from provider.constants import CONFIDENTIAL, PUBLIC
 from provider.oauth2.models import Client
 
@@ -117,13 +115,6 @@ class Command(BaseCommand):
         Raises:
             CommandError, if the URLs provided are invalid, or if the client type provided is invalid.
         """
-        # Validate URLs
-        for url_to_validate in (url, redirect_uri):
-            try:
-                URLValidator()(url_to_validate)
-            except ValidationError:
-                raise CommandError("URLs provided are invalid. Please provide valid application and redirect URLs.")
-
         # Validate and map client type to the appropriate django-oauth2-provider constant
         client_type = client_type.lower()
         client_type = {
@@ -167,11 +158,3 @@ class Command(BaseCommand):
         client_name = self.fields.pop('client_name', None)
         if client_name is not None:
             self.fields['name'] = client_name
-
-        logout_uri = self.fields.get('logout_uri')
-
-        if logout_uri:
-            try:
-                URLValidator()(logout_uri)
-            except ValidationError:
-                raise CommandError("The logout_uri is invalid.")
