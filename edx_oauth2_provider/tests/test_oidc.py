@@ -6,6 +6,8 @@ import json
 
 import jwt
 import mock
+import six
+
 from django.conf import settings
 from django.test.utils import override_settings
 from provider.oauth2.models import Grant
@@ -130,7 +132,7 @@ class UserInfoTest(BaseTestCase):
             if scope == 'email':
                 expected_claims.extend(['email'])
 
-        self.assertItemsEqual(claims.keys(), expected_claims)
+        six.assertCountEqual(self, list(claims.keys()), expected_claims)
 
     def test_values(self):
         # Add the profile scope to access token

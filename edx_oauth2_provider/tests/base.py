@@ -3,13 +3,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 import uuid
-from urlparse import urlparse
 
 import jwt
 import provider.scope
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test import TestCase
+
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, wrong-import-order
 
 from ..constants import AUTHORIZED_CLIENTS_SESSION_KEY
 from ..models import TrustedClient

@@ -7,6 +7,7 @@ import logging
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+
 import provider.constants
 import provider.oauth2.forms
 from provider.forms import OAuthValidationError

@@ -5,6 +5,10 @@ python:
   - 3.6
   - 3.7
 
+dist: xenial
+
+sudo: true
+
 env:
   - TOXENV=django111
   - TOXENV=django20
@@ -15,15 +19,15 @@ matrix:
   include:
     - python: 2.7
       env: TOXENV=quality
-  allow_failures:
-    - python: 3.6
-    - python: 3.7
+  exclude:
     - python: 2.7
       env: TOXENV=django20
     - python: 2.7
       env: TOXENV=django21
     - python: 2.7
       env: TOXENV=django22
+  allow_failures:
+    - python: 3.7
 
 
 cache:
