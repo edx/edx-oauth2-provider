@@ -3,6 +3,8 @@ Userinfo tests.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import six
+
 from .base import UserInfoTestCase
 
 
@@ -53,7 +55,7 @@ class UserInfoViewTest(UserInfoTestCase):
             u'name': user.get_full_name(),
         }
 
-        for key, value in expected.iteritems():
+        for key, value in six.iteritems(expected):
             self.assertEqual(claims[key], value)
 
     def test_claims_request(self):

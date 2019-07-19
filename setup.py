@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+
 from setuptools import find_packages, setup
 
 import edx_oauth2_provider

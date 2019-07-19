@@ -14,6 +14,8 @@ from django.test import TestCase
 from django.utils.six import StringIO
 from provider.oauth2.models import Client
 
+from six.moves import zip  # pylint: disable=redefined-builtin
+
 from ..models import TrustedClient
 
 URL = 'https://www.example.com/'
@@ -82,7 +84,7 @@ class CreateOauth2ClientTests(TestCase):
             (t for t in CLIENT_TYPES),
         ),
         # Generate all valid option combinations
-        (dict(zip(('username', 'client_name', 'client_id', 'client_secret', 'trusted'), p)) for p in product(
+        (dict(list(zip(('username', 'client_name', 'client_id', 'client_secret', 'trusted'), p))) for p in product(
             (USERNAME, None),
             ('name', None),
             ('id', None),
@@ -95,8 +97,11 @@ class CreateOauth2ClientTests(TestCase):
         """Verify that the command creates a Client when given valid arguments and options."""
         self.assert_client_created(args, options)
 
+    # py2 Missing Error (Error: too few arguments)
+    # py3 Missing Error (Error: the following arguments are required: client_type)
+    # Using Error to pass on both.
     @ddt.data(
-        ((URL, REDIRECT_URI), 'too few arguments'),
+        ((URL, REDIRECT_URI), 'Error'),
         ((URL, REDIRECT_URI, CLIENT_TYPES[0], CLIENT_TYPES[1]), 'unrecognized arguments'),
     )
     @ddt.unpack
@@ -104,8 +109,7 @@ class CreateOauth2ClientTests(TestCase):
         """Verify that the command fails when given an incorrect number of arguments."""
         with self.assertRaises(CommandError) as exc:
             self._call_command(args, {})
-
-        self.assertIn(err_msg, exc.exception.message)
+        self.assertIn(err_msg, str(exc.exception))
 
     @ddt.data(
         ('invalid', REDIRECT_URI, CLIENT_TYPES[0]),
@@ -116,14 +120,14 @@ class CreateOauth2ClientTests(TestCase):
         with self.assertRaises(CommandError) as exc:
             self._call_command(args)
 
-        self.assertIn('URLs provided are invalid.', exc.exception.message)
+        self.assertIn('URLs provided are invalid.', str(exc.exception))
 
     def test_client_type_validation(self):
         """Verify that the command fails when the provided client type is invalid."""
         with self.assertRaises(CommandError) as exc:
             self._call_command((URL, REDIRECT_URI, 'not_a_client_type'))
 
-        self.assertIn('Client type provided is invalid.', exc.exception.message)
+        self.assertIn('Client type provided is invalid.', str(exc.exception))
 
     def test_username_mismatch(self):
         """Verify that the command fails when the provided username is invalid."""
@@ -133,7 +137,7 @@ class CreateOauth2ClientTests(TestCase):
                 options={'username': 'bad_username'}
             )
 
-        self.assertIn('User matching the provided username does not exist.', exc.exception.message)
+        self.assertIn('User matching the provided username does not exist.', str(exc.exception))
 
     def test_idempotency(self):
         """Verify that the command can be run repeatedly with the same client ID, without any ill effects."""

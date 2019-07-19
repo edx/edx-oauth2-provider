@@ -1,5 +1,7 @@
 # pylint: disable=missing-docstring
 
+from __future__ import absolute_import
+
 from django.test import TestCase
 from provider.oauth2.models import AccessToken, Client, RefreshToken
 

@@ -1,6 +1,8 @@
 # pylint: disable=missing-docstring
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from six.moves import range  # pylint: disable=redefined-builtin
+
 
 class DummyHandler(object):
     def scope_profile(self, data):  # pylint: disable=unused-argument
@@ -16,7 +18,7 @@ class DummyHandler(object):
 
         """
         if data.get('essential'):
-            values = range(10)
+            values = list(range(10))
             if data.get('values'):
                 values = list(set(values) & set(data.get('values')))
             return values

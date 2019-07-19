@@ -8,6 +8,7 @@ import json
 
 from django.http import HttpResponse
 from django.views.generic import View
+
 import provider.oauth2.forms
 import provider.oauth2.views
 import provider.scope
@@ -113,11 +114,9 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
         OpenID Connect according to the `access_token` scope.
 
         """
-
         # Clear the scope for requests that do not use OpenID Connect.
         # Scopes for pure OAuth2 request are currently not supported.
         scope = constants.DEFAULT_SCOPE
-
         extra_data = {}
 
         # Add OpenID Connect `id_token` if requested.
@@ -128,7 +127,8 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
 
         if provider.scope.check(constants.OPEN_ID_SCOPE, access_token.scope):
             id_token = self.get_id_token(access_token, nonce)
-            extra_data['id_token'] = self.encode_id_token(id_token)
+            # Convert 'bytes' type to 'utf-8' as json dumps not works for 'bytes' in py3
+            extra_data['id_token'] = self.encode_id_token(id_token).decode('utf-8')
             scope = provider.scope.to_int(*id_token.scopes)
 
         # Update the token scope, so it includes only authorized values.
@@ -140,7 +140,7 @@ class AccessTokenView(provider.oauth2.views.AccessTokenView):
 
         # Add any additional fields if OpenID Connect is requested. The order of
         # the addition makes sures the OAuth2 values are not overrided.
-        response_data = dict(extra_data.items() + response_data.items())
+        response_data = dict(list(extra_data.items()) + list(response_data.items()))
 
         return response_data
 
@@ -263,7 +263,7 @@ class UserInfoView(ProtectedView):
 
         try:
             claims = self.userinfo_claims(access_token, scope_request, claims_request)
-        except ValueError, exception:
+        except ValueError as exception:
             return self._bad_request(str(exception))
 
         # TODO: Encode and sign responses if requested.

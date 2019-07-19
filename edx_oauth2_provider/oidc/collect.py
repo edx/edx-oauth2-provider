@@ -10,6 +10,7 @@ None: The functions in this module assume the `openid` scope is implied.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import provider.scope
+import six
 
 REQUIRED_SCOPES = ['openid']
 
@@ -151,7 +152,7 @@ def _validate_claim_request(claims, ignore_errors=False):
     results = {}
     claims = claims if claims else {}
 
-    for name, value in claims.iteritems():
+    for name, value in six.iteritems(claims):
         if value is None:
             results[name] = None
         elif isinstance(value, dict):
@@ -167,7 +168,7 @@ def _validate_claim_request(claims, ignore_errors=False):
 def _validate_claim_values(name, value, ignore_errors):
     """ Helper for `validate_claim_request` """
     results = {'essential': False}
-    for key, value in value.iteritems():
+    for key, value in six.iteritems(value):
         if key in CLAIM_REQUEST_FIELDS:
             results[key] = value
         else:
