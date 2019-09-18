@@ -110,7 +110,7 @@ class IdTokenTest(BaseTestCase):
         self.assertEqual(Grant.objects.filter(client=self.auth_client, user=self.user, nonce=self.nonce).count(), 1)
 
         # Validate ID token nonce
-        response = json.loads(response.content)
+        response = json.loads(response.content.decode('utf-8'))
         id_token = jwt.decode(response['id_token'], verify=False)
         self.assertEqual(id_token['nonce'], self.nonce)
 

@@ -102,6 +102,6 @@ class AuthenticationTest(OAuth2TestCase):
 
         if data.get('success', False):
             self.assertEqual(200, response.status_code)
-            self.assertIn('access_token', json.loads(response.content))
+            self.assertIn('access_token', json.loads(response.content.decode('utf-8')))
         else:
             self.assertEqual(400, response.status_code)
