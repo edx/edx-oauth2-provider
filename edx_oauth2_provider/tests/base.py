@@ -108,7 +108,7 @@ class IDTokenTestCase(OAuth2TestCase):
         response = self.get_access_token_response(scope, claims)
         self.assertEqual(response.status_code, 200)
 
-        values = json.loads(response.content)
+        values = json.loads(response.content.decode('utf-8'))
         self.assertIn('access_token', values)
 
         id_token = values['id_token']
@@ -160,7 +160,7 @@ class UserInfoTestCase(BaseTestCase):
     def get_userinfo(self, token=None, scope=None, claims=None):
         payload = _add_values({}, 'userinfo', scope, claims)
         response = self.get_with_authorization(self.path, token, payload)
-        values = json.loads(response.content)
+        values = json.loads(response.content.decode('utf-8'))
         return response, values
 
 

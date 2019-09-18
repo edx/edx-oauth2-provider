@@ -20,7 +20,7 @@ class OIDCScopeTest(IDTokenTestCase):
         response = self.get_access_token_response()
         self.assertEqual(200, response.status_code)
 
-        values = json.loads(response.content)
+        values = json.loads(response.content.decode('utf-8'))
         scope = values.get('scope', '').split()
 
         # The default scope should be empty
