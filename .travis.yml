@@ -2,8 +2,7 @@ language: python
 
 python:
   - 2.7
-  - 3.6
-  - 3.7
+  - 3.5
 
 dist: xenial
 
@@ -19,6 +18,8 @@ matrix:
   include:
     - python: 2.7
       env: TOXENV=quality
+    - python: 3.5
+      env: TOXENV=quality
   exclude:
     - python: 2.7
       env: TOXENV=django20
@@ -26,8 +27,6 @@ matrix:
       env: TOXENV=django21
     - python: 2.7
       env: TOXENV=django22
-  allow_failures:
-    - python: 3.7
 
 
 cache:
@@ -51,3 +50,5 @@ deploy:
     distributions: sdist bdist_wheel
     on:
         tags: true
+        python: 3.5
+        condition: $TOXENV = quality
